@@ -3,82 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pakki – selaintyökalut</title>
+<title>Pakki</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #F8F3EC;
+  --orange: #F25B11;
+  --orange-light: #FF9F2D;
+  --beige: #F8F3EC;
+  --brown: #53190A;
+  --brown-mid: #7a3010;
+  --muted: #9a8a80;
+  --line: #e8e0d5;
+  --teal: #7FB7B7;
   --card: #ffffff;
-  --ink: #551500;
-  --ink-2: #4a4a4a;
-  --muted: #8a8a8a;
-  --line: #e7e5df;
-  --accent: #F25B11;
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--ink);
+  font-family: 'Montserrat', -apple-system, sans-serif;
+  background: var(--beige);
+  color: var(--brown);
   font-size: 15px;
-  line-height: 1.5;
-  min-height: 100vh;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
-.page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 40px 32px 80px;
+h1, h2, h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
 }
 
-header.app-header {
+.page {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+}
+
+/* ── Header ── */
+header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 48px;
-  padding-bottom: 20px;
+  padding: 28px 0 28px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 56px;
+}
+
+.logo {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--orange);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+nav a {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  margin-left: 28px;
+  transition: color 0.15s;
+}
+
+nav a:hover { color: var(--orange); }
+nav a.cta {
+  color: var(--orange);
+  border: 1px solid var(--orange);
+  padding: 7px 16px;
+  border-radius: 4px;
+}
+nav a.cta:hover { background: var(--orange); color: white; }
+
+/* ── Hero ── */
+.hero {
+  margin-bottom: 72px;
+}
+
+.hero-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 14px;
+}
+
+.hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 300;
+  line-height: 1.15;
+  margin: 0 0 20px;
+  color: var(--brown);
+  max-width: 640px;
+}
+
+.hero h1 strong {
+  font-weight: 700;
+  color: var(--orange);
+}
+
+.hero p {
+  font-size: 15px;
+  color: var(--brown-mid);
+  max-width: 520px;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* ── Section header ── */
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
 
-.title-block h1 {
-  font-size: 30px;
-  font-weight: 700;
-  margin: 0 0 4px;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
-
-.title-block .subtitle {
-  color: var(--muted);
+.section-header h2 {
   font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.reflector-brand {
-  font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--muted);
+  margin: 0;
 }
 
-.section-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 16px;
-}
+/* ── Tools grid ── */
+.tools-section { margin-bottom: 72px; }
 
 .tool-grid {
   display: grid;
@@ -90,37 +148,48 @@ a.tool-card {
   display: block;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 24px;
+  border-radius: 8px;
+  padding: 28px;
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.12s;
+  position: relative;
+  overflow: hidden;
+}
+
+a.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--orange);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
 }
 
 a.tool-card:hover {
-  box-shadow: 0 4px 16px rgba(85,21,0,0.08);
-  border-color: #d1cdc6;
-  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(83,25,10,0.09);
+  border-color: #d8cfc5;
+  transform: translateY(-2px);
 }
 
-.tool-icon {
-  font-size: 28px;
-  margin-bottom: 14px;
-  line-height: 1;
-}
+a.tool-card:hover::before { transform: scaleX(1); }
 
 .tool-name {
-  font-size: 16px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 17px;
   font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 6px;
+  color: var(--brown);
+  margin: 0 0 8px;
 }
 
 .tool-desc {
   font-size: 13px;
-  color: var(--ink-2);
-  margin: 0 0 16px;
-  line-height: 1.5;
+  color: var(--brown-mid);
+  margin: 0 0 20px;
+  line-height: 1.55;
+  opacity: 0.85;
 }
 
 .tool-tags {
@@ -131,66 +200,177 @@ a.tool-card:hover {
 
 .tag {
   font-size: 11px;
-  font-weight: 500;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: #f0eee8;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+  background: var(--beige);
   color: var(--muted);
-  letter-spacing: 0.02em;
 }
 
-.tag.csv { background: #e8f4ee; color: #2d6e4a; }
-.tag.svg { background: #e8eef8; color: #2d4a8a; }
+.tag.orange { background: #fde8db; color: #b84000; }
+.tag.teal   { background: #ddf0f0; color: #3a7a7a; }
 
+/* ── News section ── */
+.news-section { margin-bottom: 56px; }
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.news-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 24px 28px;
+}
+
+.news-date {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+
+.news-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--brown);
+  line-height: 1.35;
+}
+
+.news-card p {
+  font-size: 13px;
+  color: var(--brown-mid);
+  margin: 0;
+  opacity: 0.85;
+  line-height: 1.55;
+}
+
+/* ── Footer ── */
 footer {
-  margin-top: 64px;
-  padding-top: 20px;
+  padding-top: 24px;
   border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-logo {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--orange);
+  text-decoration: none;
+}
+
+.footer-note {
   font-size: 12px;
   color: var(--muted);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
 }
 
-footer a {
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-links a {
+  font-size: 12px;
   color: var(--muted);
   text-decoration: none;
 }
 
-footer a:hover { color: var(--accent); }
+.footer-links a:hover { color: var(--orange); }
+
+@media (max-width: 600px) {
+  .page { padding: 0 20px 60px; }
+  nav a:not(.cta) { display: none; }
+  header { margin-bottom: 40px; }
+  .hero h1 { font-size: 30px; }
+}
 </style>
 </head>
 <body>
 <div class="page">
-  <header class="app-header">
-    <div class="title-block">
-      <h1>Pakki</h1>
-      <div class="subtitle">Selaintyökalut — kaikki koodi ajautuu sinun koneellasi</div>
-    </div>
-    <div class="reflector-brand">Reflector</div>
+
+  <header>
+    <a class="logo" href="/">Reflector</a>
+    <nav>
+      <a href="https://www.reflector.fi" target="_blank" rel="noopener">reflector.fi</a>
+    </nav>
   </header>
 
-  <p class="section-label">Työkalut</p>
+  <section class="hero">
+    <div class="hero-label">Reflector — sisäiset työkalut</div>
+    <h1><strong>Pakki</strong></h1>
+    <h2 style="font-family:'Montserrat',sans-serif;font-size:20px;font-weight:400;color:var(--brown-mid);margin:0 0 16px;opacity:0.8">Selaintyökalut jokapäiväiseen työhön.</h2>
+    <p>Kokoelma käytännön apuvälineitä projekti- ja konsultointityöhön. Kaikki toimii suoraan selaimessa — ei kirjautumista, ei dataa palvelimelle.</p>
+  </section>
 
-  <div class="tool-grid">
-    <a class="tool-card" href="gantt/">
-      <div class="tool-icon">📊</div>
-      <div class="tool-name">Gantt-muunnin</div>
-      <div class="tool-desc">Lataa CSV-tiedosto ja visualisoi projektin aikataulu interaktiivisena Gantt-kaaviona. Vie tulostettavana PNG:nä.</div>
-      <div class="tool-tags">
-        <span class="tag csv">CSV → Gantt</span>
-        <span class="tag svg">PNG-vienti</span>
+  <section class="tools-section">
+    <div class="section-header">
+      <h2>Työkalut</h2>
+    </div>
+    <div class="tool-grid">
+      <a class="tool-card" href="gantt/">
+        <div class="tool-name">Gantt-muunnin</div>
+        <div class="tool-desc">Lataa CSV-tiedosto ja visualisoi projektin aikataulu interaktiivisena Gantt-kaaviona. Tuki edistymisprosenteille ja suuruusluokille.</div>
+        <div class="tool-tags">
+          <span class="tag orange">CSV → Gantt</span>
+          <span class="tag teal">SVG · PNG-vienti</span>
+        </div>
+      </a>
+      <a class="tool-card" href="gitgraph/">
+        <div class="tool-name">GitGraph-muunnin</div>
+        <div class="tool-desc">Muunna release-aikataulu CSV:stä GitGraph-diagrammiksi. Visualisoi haarautuminen, julkaisut ja hotfixit selkeänä kaaviона.</div>
+        <div class="tool-tags">
+          <span class="tag orange">CSV → GitGraph</span>
+          <span class="tag teal">SVG · PNG-vienti</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="news-section">
+    <div class="section-header">
+      <h2>Reflector uutisissa</h2>
+      <a href="https://www.reflector.fi" target="_blank" rel="noopener" style="font-size:13px;color:var(--orange);text-decoration:none;font-weight:500">Kaikki uutiset →</a>
+    </div>
+    <div class="news-grid">
+      <div class="news-card">
+        <div class="news-date">Huhtikuu 2026</div>
+        <h3>Reflector julkaisi päivitetyn brändiohjeiston</h3>
+        <p>Visuaalinen ilme uudistui — uudet fontit, värit ja ohjeistus yhtenäistävät brändin kaikissa kanavissa.</p>
       </div>
-    </a>
-  </div>
+      <div class="news-card">
+        <div class="news-date">Maaliskuu 2026</div>
+        <h3>Finanssialan perusjärjestelmäprojektit kasvussa</h3>
+        <p>Reflectorin erikoisosaamiselle on kasvava kysyntä, kun suomalaiset finanssitalot uudistavat ydinjärjestelmiään.</p>
+      </div>
+      <div class="news-card">
+        <div class="news-date">Tammikuu 2026</div>
+        <h3>Uusia konsultteja tiimiin</h3>
+        <p>Reflector vahvistaa joukkojaan — tervetuloa uusille reflectorlaisille projektihallinnan ja arkkitehtuurin tehtäviin.</p>
+      </div>
+    </div>
+  </section>
 
   <footer>
-    <span>Kaikki työkalut toimivat täysin selaimessa — ei palvelinpyyntöjä, ei tallennusta.</span>
-    <a href="https://github.com/reflector-oy/pakki" target="_blank" rel="noopener">GitHub</a>
+    <a class="footer-logo" href="https://www.reflector.fi" target="_blank" rel="noopener">Reflector</a>
+    <div class="footer-note">Kaikki työkalut toimivat selaimessa — ei palvelinpyyntöjä, ei tallennusta.</div>
+    <div class="footer-links">
+      <a href="https://www.reflector.fi" target="_blank" rel="noopener">reflector.fi</a>
+      <a href="https://github.com/reflector-oy/pakki" target="_blank" rel="noopener">GitHub</a>
+    </div>
   </footer>
+
 </div>
 </body>
 </html>

@@ -1,0 +1,22 @@
+Tyyppi,Haara,Lahde,Kuvaus,Versio
+commit,main,,,Projektin aloitus
+haara,develop,,,
+commit,develop,,,Käyttäjähallinta
+commit,develop,,,Integraatiorajapinta
+commit,develop,,,Raportointi
+haara,release/1.0,,,
+commit,release/1.0,,,Testauskorjaukset
+yhdista,main,release/1.0,,v1.0.0
+yhdista,develop,release/1.0,,
+commit,develop,,,Maksuliikenne-integraatio
+haara,hotfix/1.0.1,,,
+commit,hotfix/1.0.1,,,Kriittinen kirjautumisbugi
+yhdista,main,hotfix/1.0.1,,v1.0.1
+yhdista,develop,hotfix/1.0.1,,
+commit,develop,,,SSO-tuki
+commit,develop,,,Suorituskykyparannukset
+haara,release/1.1,,,
+commit,release/1.1,,,Regressiotestit
+commit,release/1.1,,,Dokumentaatio
+yhdista,main,release/1.1,,v1.1.0
+yhdista,develop,release/1.1,,

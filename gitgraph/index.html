@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitGraph-muunnin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600;12..96,700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F3EC;
+  --card: #ffffff;
+  --ink: #53190A;
+  --ink-2: #7a3010;
+  --muted: #9a8a80;
+  --line: #e8e0d5;
+  --accent: #F25B11;
+  --today: #c0392b;
+  --row-h: 52px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; }
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+/* ── Header ── */
+header.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title-block h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.title-block .subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reflector-brand {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  border-left: 1px solid var(--line);
+  padding-left: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+button.btn, a.btn {
+  font-family: 'Montserrat', inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+button.btn:hover, a.btn:hover { background: #faf7f2; border-color: #d6cfc5; color: var(--ink); }
+button.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+button.btn.primary:hover { background: #d44d0d; }
+button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Error banner ── */
+.error-banner {
+  background: #fdf0ee;
+  border: 1px solid #f5c6bc;
+  color: #8b2010;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+.error-banner.hidden { display: none; }
+
+/* ── Drop zone ── */
+.dropzone {
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 40px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  margin-bottom: 24px;
+}
+
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent);
+  background: #fdf5f0;
+}
+
+.dropzone-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.dropzone h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+
+.dropzone p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+
+.dropzone table {
+  margin: 16px auto 0;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+.dropzone th {
+  font-weight: 600;
+  color: var(--ink);
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dropzone td {
+  padding: 4px 12px;
+  color: var(--ink-2);
+  vertical-align: top;
+}
+
+.dropzone td code {
+  background: #f0ede8;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.dropzone td.col-values {
+  color: var(--muted);
+}
+
+.req { color: var(--accent); font-weight: 700; }
+
+.columns {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.columns a {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ── Diagram card ── */
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.diagram-wrap {
+  padding: 32px;
+  overflow-x: auto;
+}
+
+.diagram-wrap.empty {
+  display: none;
+}
+
+/* Override Mermaid font to match brand */
+#diagram svg {
+  max-width: 100%;
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+/* ── Source toggle ── */
+.source-section {
+  margin-bottom: 24px;
+}
+
+.source-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.source-toggle:hover { color: var(--ink); }
+
+.source-toggle .arrow { transition: transform 0.15s; }
+.source-toggle.open .arrow { transform: rotate(90deg); }
+
+.source-box {
+  display: none;
+  margin-top: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+}
+
+.source-box.visible { display: block; }
+
+.source-box pre {
+  margin: 0;
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  white-space: pre;
+}
+
+/* ── Footer note ── */
+.footer-note {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+/* ── Print ── */
+@media print {
+  body { background: white; }
+  .page { padding: 0; max-width: none; }
+  .actions, .dropzone, .source-section { display: none !important; }
+  .chart-card { box-shadow: none; border-color: #ccc; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="app-header">
+    <div class="title-block">
+      <h1>GitGraph-muunnin</h1>
+      <div class="subtitle">Release management — CSV → GitGraph</div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="location.href='../index.html'">← Pakki</button>
+      <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
+      <button class="btn" id="printBtn" disabled>Tulosta</button>
+      <button class="btn" id="svgBtn" disabled>Lataa SVG</button>
+      <button class="btn primary" id="pngBtn" disabled>Lataa PNG</button>
+      <div class="reflector-brand">Reflector</div>
+    </div>
+  </header>
+
+  <div id="errorBanner" class="error-banner hidden"></div>
+
+  <div class="dropzone" id="dropzone">
+    <div class="dropzone-icon">🌿</div>
+    <h2>Lataa release-aikataulu CSV-tiedostona</h2>
+    <p>Vedä tiedosto tähän tai klikkaa valitaksesi</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Sarake</th>
+          <th>Kuvaus</th>
+          <th class="col-values">Arvot</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>Tyyppi</code> <span class="req">*</span></td>
+          <td>Tapahtuman laji</td>
+          <td class="col-values">commit · haara · yhdista</td>
+        </tr>
+        <tr>
+          <td><code>Haara</code> <span class="req">*</span></td>
+          <td>Kohdehaara</td>
+          <td class="col-values">main, develop, release/1.0, hotfix/1.0.1</td>
+        </tr>
+        <tr>
+          <td><code>Lahde</code></td>
+          <td>Yhdistettävä haara</td>
+          <td class="col-values">develop (vain yhdista-riveillä)</td>
+        </tr>
+        <tr>
+          <td><code>Kuvaus</code></td>
+          <td>Commit-viesti</td>
+          <td class="col-values">Käyttäjähallinta valmis</td>
+        </tr>
+        <tr>
+          <td><code>Versio</code></td>
+          <td>Julkaisutagi</td>
+          <td class="col-values">v1.0.0</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:var(--muted);margin:10px 0 0"><span style="color:var(--accent);font-weight:700">*</span> pakollinen sarake — rivit käsitellään järjestyksessä ylhäältä alas</p>
+    <div class="columns" style="margin-top:14px">
+      <a href="release_esimerkki.csv" download onclick="event.stopPropagation()">Lataa esimerkkitiedosto</a>
+    </div>
+    <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none">
+  </div>
+
+  <div class="chart-card" id="chartCard" style="display:none">
+    <div class="diagram-wrap" id="diagramWrap">
+      <div id="diagram"></div>
+    </div>
+  </div>
+
+  <div class="source-section" id="sourceSection" style="display:none">
+    <button class="source-toggle" id="sourceToggle">
+      <span class="arrow">▶</span> Mermaid-lähdekoodi
+    </button>
+    <div class="source-box" id="sourceBox">
+      <pre id="sourceCode"></pre>
+    </div>
+  </div>
+
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<script src="../lib/mermaid.min.js"></script>
+<script>
+// ── Mermaid init ────────────────────────────────────────────
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  themeVariables: {
+    git0: '#F25B11',
+    git1: '#7FB7B7',
+    git2: '#53190A',
+    git3: '#FF9F2D',
+    git4: '#FFD577',
+    git5: '#7FB7B7',
+    git6: '#FF9F2D',
+    git7: '#FFD577',
+    gitInv0: '#ffffff',
+    gitInv1: '#ffffff',
+    gitInv2: '#ffffff',
+    gitInv3: '#53190A',
+    gitInv4: '#53190A',
+    gitBranchLabel0: '#ffffff',
+    gitBranchLabel1: '#ffffff',
+    gitBranchLabel2: '#ffffff',
+    gitBranchLabel3: '#53190A',
+    tagLabelFontSize: '12px',
+    commitLabelFontSize: '11px',
+    fontSize: '13px',
+  },
+  gitGraph: {
+    mainBranchName: 'main',
+    rotateCommitLabel: true,
+    showCommitLabel: true,
+  }
+});
+
+// ── CSV parsing ─────────────────────────────────────────────
+function parseCSV(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const firstLine = text.split(/\r?\n/, 1)[0] || '';
+  const counts = {
+    ',': (firstLine.match(/,/g) || []).length,
+    ';': (firstLine.match(/;/g) || []).length,
+    '\t': (firstLine.match(/\t/g) || []).length,
+  };
+  const delim = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === delim) { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c === '\r') { /* skip */ }
+      else field += c;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  while (rows.length && rows[rows.length - 1].every(c => !c || !c.trim())) rows.pop();
+  if (!rows.length) return [];
+
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).map(r => {
+    const o = {};
+    headers.forEach((h, i) => { o[h] = (r[i] || '').trim(); });
+    return o;
+  });
+}
+
+// ── Column normalization ─────────────────────────────────────
+const ALIASES = {
+  tyyppi:  ['tyyppi', 'type', 'toiminto', 'tapahtuma'],
+  haara:   ['haara', 'branch', 'kohde'],
+  lahde:   ['lahde', 'lähde', 'source', 'from', 'lahdehaara'],
+  kuvaus:  ['kuvaus', 'description', 'viesti', 'message', 'commit', 'teksti'],
+  versio:  ['versio', 'version', 'tag', 'tagi', 'julkaisu', 'release'],
+};
+
+function normKey(k) {
+  return k.toLowerCase()
+    .replace(/[\s_\-]/g, '')
+    .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/å/g, 'a');
+}
+
+function buildMap(headers) {
+  const norm = headers.map(h => [h, normKey(h)]);
+  const map = {};
+  for (const [field, aliases] of Object.entries(ALIASES)) {
+    const aliasSet = new Set(aliases.map(normKey));
+    const found = norm.find(([_, n]) => aliasSet.has(n));
+    if (found) map[field] = found[0];
+  }
+  return map;
+}
+
+// ── CSV → Mermaid gitGraph ───────────────────────────────────
+function csvToMermaid(rawRows) {
+  if (!rawRows.length) throw new Error('CSV on tyhjä.');
+  const map = buildMap(Object.keys(rawRows[0]));
+  if (!map.tyyppi || !map.haara) {
+    throw new Error('CSV:stä puuttuu pakollinen sarake. Tarvitaan: Tyyppi, Haara. Löydetyt: ' + Object.keys(rawRows[0]).join(', '));
+  }
+
+  const rows = rawRows
+    .filter(r => (r[map.tyyppi] || '').trim())
+    .map(r => ({
+      tyyppi: (r[map.tyyppi] || '').trim().toLowerCase(),
+      haara:  (r[map.haara]  || '').trim(),
+      lahde:  map.lahde  ? (r[map.lahde]  || '').trim() : '',
+      kuvaus: map.kuvaus ? (r[map.kuvaus] || '').trim() : '',
+      versio: map.versio ? (r[map.versio] || '').trim() : '',
+    }));
+
+  const lines = ['gitGraph'];
+  let currentBranch = 'main';
+  const idCounts = {};
+
+  function uniqueId(base) {
+    if (!base) return undefined;
+    const key = base.toLowerCase();
+    idCounts[key] = (idCounts[key] || 0) + 1;
+    return idCounts[key] > 1 ? `${base} (${idCounts[key]})` : base;
+  }
+
+  function q(s) { return s.replace(/"/g, "'"); }
+
+  function ensureCheckout(haara) {
+    if (haara && haara !== currentBranch) {
+      lines.push(`  checkout ${haara}`);
+      currentBranch = haara;
+    }
+  }
+
+  for (const r of rows) {
+    if (!r.haara) continue;
+
+    if (r.tyyppi === 'haara' || r.tyyppi === 'branch') {
+      lines.push(`  branch ${r.haara}`);
+      currentBranch = r.haara;
+
+    } else if (r.tyyppi === 'commit') {
+      ensureCheckout(r.haara);
+      const id = uniqueId(r.kuvaus);
+      let line = '  commit';
+      if (id)      line += ` id: "${q(id)}"`;
+      if (r.versio) line += ` tag: "${q(r.versio)}"`;
+      lines.push(line);
+
+    } else if (r.tyyppi === 'yhdista' || r.tyyppi === 'merge') {
+      if (!r.lahde) throw new Error(`Rivi tyyppiä "yhdista" puuttuu Lahde-sarake: haara=${r.haara}`);
+      ensureCheckout(r.haara);
+      // Suppress commit id when versio tag is set — avoids label overlap on merge node
+      const id = r.versio ? undefined : uniqueId(r.kuvaus);
+      let line = `  merge ${r.lahde}`;
+      if (id)       line += ` id: "${q(id)}"`;
+      if (r.versio) line += ` tag: "${q(r.versio)}"`;
+      lines.push(line);
+
+    } else {
+      throw new Error(`Tuntematon tyyppi: "${r.tyyppi}". Sallitut: commit, haara, yhdista.`);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+// ── Render ──────────────────────────────────────────────────
+let currentMermaidCode = '';
+let taskCount = 0;
+async function renderDiagram(code) {
+  currentMermaidCode = code;
+  const container = document.getElementById('diagram');
+  const chartCard = document.getElementById('chartCard');
+  const sourceSection = document.getElementById('sourceSection');
+
+  container.innerHTML = '';
+  const id = 'mermaid-' + Date.now();
+
+  try {
+    const { svg } = await mermaid.render(id, code);
+    container.innerHTML = svg;
+    chartCard.style.display = '';
+    sourceSection.style.display = '';
+    document.getElementById('dropzone').style.display = 'none';
+    document.getElementById('sourceCode').textContent = code;
+
+    document.getElementById('printBtn').disabled = false;
+    document.getElementById('svgBtn').disabled = false;
+    document.getElementById('pngBtn').disabled = false;
+    document.getElementById('reloadBtn').disabled = false;
+  } catch (err) {
+    // mermaid may insert an error element — clean up
+    const errEl = document.getElementById(id + '-svg');
+    if (errEl) errEl.remove();
+    throw new Error('Mermaid-virhe: ' + (err.message || err));
+  }
+}
+
+// ── File loading ─────────────────────────────────────────────
+let exportFilename = 'gitgraph';
+
+function loadFile(file) {
+  clearError();
+  exportFilename = file.name.replace(/\.[^.]+$/, '');
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const raw = parseCSV(e.target.result);
+      const code = csvToMermaid(raw);
+      taskCount = raw.filter(r => (r[Object.keys(r)[0]] || '').trim()).length;
+      await renderDiagram(code);
+      document.getElementById('footerNote').textContent =
+        file.name + ' — ' + taskCount + ' tapahtumaa';
+    } catch (err) {
+      showError(err.message);
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── Drop zone ────────────────────────────────────────────────
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+
+dropzone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) loadFile(e.target.files[0]);
+});
+
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('drag-over');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) loadFile(file);
+});
+
+document.getElementById('reloadBtn').addEventListener('click', () => {
+  document.getElementById('chartCard').style.display = 'none';
+  document.getElementById('sourceSection').style.display = 'none';
+  document.getElementById('dropzone').style.display = '';
+  document.getElementById('footerNote').textContent = '';
+  document.getElementById('printBtn').disabled = true;
+  document.getElementById('svgBtn').disabled = true;
+  document.getElementById('pngBtn').disabled = true;
+  document.getElementById('reloadBtn').disabled = true;
+  fileInput.value = '';
+  currentMermaidCode = '';
+});
+
+// ── Source toggle ────────────────────────────────────────────
+document.getElementById('sourceToggle').addEventListener('click', () => {
+  const btn = document.getElementById('sourceToggle');
+  const box = document.getElementById('sourceBox');
+  btn.classList.toggle('open');
+  box.classList.toggle('visible');
+});
+
+// ── SVG export ───────────────────────────────────────────────
+document.getElementById('svgBtn').addEventListener('click', () => {
+  const svgEl = document.querySelector('#diagram svg');
+  if (!svgEl) return;
+  const blob = new Blob([svgEl.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = exportFilename + '.svg';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+// ── Print ────────────────────────────────────────────────────
+document.getElementById('printBtn').addEventListener('click', () => {
+  const svgEl = document.querySelector('#diagram svg');
+  if (!svgEl) return;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>GitGraph</title><style>@page{margin:10mm}body{margin:0;background:white}svg{max-width:100%;display:block}</style></head><body>${svgEl.outerHTML}</body></html>`);
+  win.document.close();
+  win.print();
+  setTimeout(() => win.close(), 500);
+});
+
+// ── PNG export ───────────────────────────────────────────────
+document.getElementById('pngBtn').addEventListener('click', async () => {
+  const svgEl = document.querySelector('#diagram svg');
+  if (!svgEl) return;
+
+  const scale = 2;
+  const w = svgEl.getBoundingClientRect().width || 1200;
+  const h = svgEl.getBoundingClientRect().height || 600;
+
+  const svgClone = svgEl.cloneNode(true);
+  svgClone.setAttribute('width', w);
+  svgClone.setAttribute('height', h);
+  const svgData = new XMLSerializer().serializeToString(svgClone);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w * scale;
+  canvas.height = h * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  ctx.fillStyle = '#F8F3EC';
+  ctx.fillRect(0, 0, w, h);
+
+  const img = new Image();
+  const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.download = exportFilename + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  };
+  img.src = url;
+});
+
+// ── Error helpers ────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('errorBanner');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function clearError() {
+  document.getElementById('errorBanner').classList.add('hidden');
+}
+</script>
+</body>
+</html>

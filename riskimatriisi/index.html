@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Riskimatriisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600;12..96,700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F3EC;
+  --card: #ffffff;
+  --ink: #53190A;
+  --ink-2: #7a3010;
+  --muted: #9a8a80;
+  --line: #e8e0d5;
+  --accent: #F25B11;
+
+  --risk-low:      #ddf0e8;
+  --risk-medium:   #fef3cd;
+  --risk-high:     #fde0bc;
+  --risk-critical: #fad0cc;
+
+  --dot-low:      #4f8a6b;
+  --dot-medium:   #c47b1f;
+  --dot-high:     #d44d0d;
+  --dot-critical: #c0392b;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; }
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+/* ── Header ── */
+header.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title-block h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.title-block .subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reflector-brand {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  border-left: 1px solid var(--line);
+  padding-left: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+button.btn {
+  font-family: 'Montserrat', inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+button.btn:hover { background: #faf7f2; border-color: #d6cfc5; color: var(--ink); }
+button.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+button.btn.primary:hover { background: #d44d0d; }
+button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Error ── */
+.error-banner {
+  background: #fdf0ee;
+  border: 1px solid #f5c6bc;
+  color: #8b2010;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+.error-banner.hidden { display: none; }
+
+/* ── Drop zone ── */
+.dropzone {
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 40px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  margin-bottom: 24px;
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent);
+  background: #fdf5f0;
+}
+.dropzone-icon { font-size: 32px; margin-bottom: 12px; line-height: 1; }
+.dropzone h2 { font-size: 16px; font-weight: 600; margin: 0 0 6px; }
+.dropzone p { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
+
+.dropzone table {
+  margin: 16px auto 0;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+.dropzone th {
+  font-weight: 600;
+  color: var(--ink);
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.dropzone td { padding: 4px 12px; color: var(--ink-2); vertical-align: top; }
+.dropzone td code {
+  background: #f0ede8;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.dropzone td.col-vals { color: var(--muted); }
+.req { color: var(--accent); font-weight: 700; }
+.dropzone-link { color: var(--accent); font-size: 13px; font-weight: 500; margin-top: 14px; display: inline-block; }
+
+/* ── Chart card ── */
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 32px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.chart-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+#chart { display: block; flex-shrink: 0; }
+
+/* ── Risk table ── */
+.risk-table-wrap {
+  flex: 1;
+  min-width: 280px;
+  overflow-x: auto;
+}
+
+.risk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.risk-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.risk-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f2ede8;
+  vertical-align: top;
+}
+.risk-table tr:last-child td { border-bottom: none; }
+.risk-table tr:hover td { background: #faf7f3; }
+
+.risk-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.risk-name { font-weight: 500; color: var(--ink); line-height: 1.35; }
+.risk-owner { color: var(--muted); font-size: 11px; margin-top: 2px; }
+.risk-action { color: var(--ink-2); font-size: 11px; margin-top: 3px; line-height: 1.4; }
+
+.score-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* ── Legend ── */
+.legend-strip {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-2);
+}
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Tooltip ── */
+.tt {
+  position: fixed;
+  background: #1a1a1a;
+  color: #f0f0f0;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  max-width: 280px;
+  line-height: 1.5;
+  z-index: 100;
+}
+.tt.show { opacity: 1; }
+.tt strong { display: block; margin-bottom: 4px; font-weight: 600; }
+.tt .tt-row { color: #b0b0b0; font-size: 11px; }
+
+/* ── Footer ── */
+.footer-note {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+@media print {
+  body { background: white; }
+  .page { padding: 0; max-width: none; }
+  .actions, .dropzone { display: none !important; }
+  .chart-card { box-shadow: none; border-color: #ccc; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="app-header">
+    <div class="title-block">
+      <h1>Riskimatriisi</h1>
+      <div class="subtitle">Projektinhallinta — CSV → Riskimatriisi</div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="location.href='../index.html'">← Pakki</button>
+      <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
+      <button class="btn" id="printBtn" disabled>Tulosta</button>
+      <button class="btn" id="svgBtn" disabled>Lataa SVG</button>
+      <button class="btn primary" id="pngBtn" disabled>Lataa PNG</button>
+      <div class="reflector-brand">Reflector</div>
+    </div>
+  </header>
+
+  <div id="errorBanner" class="error-banner hidden"></div>
+
+  <div class="dropzone" id="dropzone">
+    <div class="dropzone-icon">⚠️</div>
+    <h2>Lataa riskirekisteri CSV-tiedostona</h2>
+    <p>Vedä tiedosto tähän tai klikkaa valitaksesi</p>
+    <table>
+      <thead><tr><th>Sarake</th><th>Kuvaus</th><th class="col-vals">Arvot</th></tr></thead>
+      <tbody>
+        <tr><td><code>Riski</code> <span class="req">*</span></td><td>Riskin kuvaus</td><td class="col-vals">Vapaateksti</td></tr>
+        <tr><td><code>Todennäköisyys</code> <span class="req">*</span></td><td>Toteutumisen todennäköisyys</td><td class="col-vals">1 (harvinainen) – 5 (lähes varma)</td></tr>
+        <tr><td><code>Vaikutus</code> <span class="req">*</span></td><td>Toteutumisen vaikutus</td><td class="col-vals">1 (vähäinen) – 5 (katastrofaalinen)</td></tr>
+        <tr><td><code>Omistaja</code></td><td>Vastuuhenkilö</td><td class="col-vals">Vapaateksti</td></tr>
+        <tr><td><code>Toimenpide</code></td><td>Hallintakeino</td><td class="col-vals">Vapaateksti</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:var(--muted);margin:10px 0 0"><span style="color:var(--accent);font-weight:700">*</span> pakollinen sarake</p>
+    <a href="esimerkki.csv" download onclick="event.stopPropagation()" class="dropzone-link">Lataa esimerkkitiedosto</a>
+    <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none">
+  </div>
+
+  <div class="chart-card" id="chartCard">
+    <div class="chart-layout">
+      <svg id="chart"></svg>
+      <div class="risk-table-wrap">
+        <table class="risk-table">
+          <thead><tr><th>#</th><th>Riski</th><th>T×V</th></tr></thead>
+          <tbody id="riskTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="legend-strip">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--risk-low)"></div> Matala (1–4)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--risk-medium)"></div> Kohtalainen (5–9)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--risk-high)"></div> Korkea (10–14)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--risk-critical)"></div> Kriittinen (15–25)</div>
+    </div>
+  </div>
+
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<div class="tt" id="tooltip"></div>
+
+<script>
+// ── Constants ────────────────────────────────────────────────
+const CW = 108, CH = 88;        // cell width / height
+const ML = 106, MB = 64, MT = 20, MR = 20; // margins
+const SVG_W = ML + 5 * CW + MR;
+const SVG_H = MT + 5 * CH + MB;
+const RISK_R = 15;
+const NS = 'http://www.w3.org/2000/svg';
+
+// ── Helpers ──────────────────────────────────────────────────
+function svel(tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function score(p, v) { return p * v; }
+
+function cellFill(p, v) {
+  const s = score(p, v);
+  if (s >= 15) return '#fad0cc';
+  if (s >= 10) return '#fde0bc';
+  if (s >= 5)  return '#fef3cd';
+  return '#ddf0e8';
+}
+
+function dotColor(p, v) {
+  const s = score(p, v);
+  if (s >= 15) return '#c0392b';
+  if (s >= 10) return '#d44d0d';
+  if (s >= 5)  return '#c47b1f';
+  return '#4f8a6b';
+}
+
+function scoreLabel(s) {
+  if (s >= 15) return { text: 'Kriittinen', bg: '#fad0cc', fg: '#7a0e0e' };
+  if (s >= 10) return { text: 'Korkea',     bg: '#fde0bc', fg: '#7a3010' };
+  if (s >= 5)  return { text: 'Kohtalainen',bg: '#fef3cd', fg: '#7a5c10' };
+  return             { text: 'Matala',      bg: '#ddf0e8', fg: '#1e5c3a' };
+}
+
+function cellX(v) { return ML + (v - 1) * CW; }
+function cellY(p) { return MT + (5 - p) * CH; }
+
+// Position N circles within a cell centered at (cx, cy)
+function calcPositions(count, cx, cy) {
+  if (count === 1) return [{ x: cx, y: cy }];
+  const gap = 4, diam = RISK_R * 2 + gap;
+  const cols = count <= 2 ? count : Math.min(3, count);
+  const rows = Math.ceil(count / cols);
+  const pos = [];
+  for (let i = 0; i < count; i++) {
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    const rowCount = Math.min(cols, count - row * cols);
+    const rowW = rowCount * diam - gap;
+    const totalH = rows * diam - gap;
+    pos.push({
+      x: cx - rowW / 2 + col * diam + RISK_R,
+      y: cy - totalH / 2 + row * diam + RISK_R,
+    });
+  }
+  return pos;
+}
+
+// ── CSV parsing ──────────────────────────────────────────────
+function parseCSV(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const counts = { ',': (first.match(/,/g)||[]).length, ';': (first.match(/;/g)||[]).length, '\t': (first.match(/\t/g)||[]).length };
+  const delim = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  const rows = []; let row = [], field = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) { if (c==='"') { if (text[i+1]==='"'){field+='"';i++;}else inQ=false; } else field+=c; }
+    else { if(c==='"')inQ=true; else if(c===delim){row.push(field);field='';} else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';} else if(c==='\r'){} else field+=c; }
+  }
+  if (field.length||row.length){row.push(field);rows.push(row);}
+  while(rows.length&&rows[rows.length-1].every(c=>!c||!c.trim()))rows.pop();
+  if(!rows.length)return[];
+  const headers = rows[0].map(h=>h.trim());
+  return rows.slice(1).map(r=>{const o={};headers.forEach((h,i)=>{o[h]=(r[i]||'').trim();});return o;});
+}
+
+const ALIASES = {
+  riski:        ['riski','risk','name','nimi','kuvaus','description'],
+  todennakoisyys:['todennakoisyys','todennäköisyys','probability','prob','likelihood','t'],
+  vaikutus:     ['vaikutus','impact','severity','v'],
+  omistaja:     ['omistaja','owner','vastuuhenkilo','vastuuhenkilö'],
+  toimenpide:   ['toimenpide','action','mitigation','hallintakeino','keino'],
+};
+function normKey(k){ return k.toLowerCase().replace(/[\s_\-]/g,'').replace(/ä/g,'a').replace(/ö/g,'o').replace(/å/g,'a'); }
+function buildMap(headers){
+  const norm=headers.map(h=>[h,normKey(h)]);
+  const map={};
+  for(const[field,aliases]of Object.entries(ALIASES)){
+    const s=new Set(aliases.map(normKey));
+    const f=norm.find(([_,n])=>s.has(n));
+    if(f)map[field]=f[0];
+  }
+  return map;
+}
+
+function normalizeRows(raw) {
+  if(!raw.length) throw new Error('CSV on tyhjä.');
+  const map = buildMap(Object.keys(raw[0]));
+  if(!map.riski||!map.todennakoisyys||!map.vaikutus)
+    throw new Error('Puuttuu pakollinen sarake. Tarvitaan: Riski, Todennäköisyys, Vaikutus. Löydetyt: '+Object.keys(raw[0]).join(', '));
+  return raw
+    .filter(r=>(r[map.riski]||'').trim())
+    .map((r,i)=>{
+      const p = Math.round(parseFloat(r[map.todennakoisyys])||0);
+      const v = Math.round(parseFloat(r[map.vaikutus])||0);
+      if(p<1||p>5) throw new Error(`Rivi ${i+2}: Todennäköisyys "${r[map.todennakoisyys]}" ei ole välillä 1–5.`);
+      if(v<1||v>5) throw new Error(`Rivi ${i+2}: Vaikutus "${r[map.vaikutus]}" ei ole välillä 1–5.`);
+      return {
+        num: i+1,
+        riski:      r[map.riski].trim(),
+        p, v,
+        omistaja:   map.omistaja   ? (r[map.omistaja]   ||'').trim() : '',
+        toimenpide: map.toimenpide ? (r[map.toimenpide] ||'').trim() : '',
+      };
+    });
+}
+
+// ── Render ───────────────────────────────────────────────────
+let allRisks = [];
+
+function renderMatrix(risks) {
+  allRisks = risks;
+  const svg = document.getElementById('chart');
+  svg.innerHTML = '';
+  svg.setAttribute('width', SVG_W);
+  svg.setAttribute('height', SVG_H);
+  svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
+  const F = 'Montserrat,sans-serif';
+
+  // Background
+  svg.appendChild(svel('rect',{width:SVG_W,height:SVG_H,fill:'#ffffff'}));
+
+  // Cells
+  for(let p=1;p<=5;p++) for(let v=1;v<=5;v++) {
+    svg.appendChild(svel('rect',{x:cellX(v),y:cellY(p),width:CW,height:CH,fill:cellFill(p,v),stroke:'#e8e0d5','stroke-width':1}));
+  }
+
+  // Y-axis number labels
+  for(let p=1;p<=5;p++) {
+    svg.appendChild(svel('text',{x:ML-10,y:cellY(p)+CH/2+5,'text-anchor':'end','font-family':F,'font-size':13,'font-weight':600,fill:'#53190A'},String(p)));
+  }
+  // Y-axis title (rotated)
+  const yLbl = svel('text',{x:14,y:MT+5*CH/2,'text-anchor':'middle','font-family':F,'font-size':10,'font-weight':600,fill:'#9a8a80','letter-spacing':1.5,transform:`rotate(-90,14,${MT+5*CH/2})`},'TODENNÄKÖISYYS');
+  svg.appendChild(yLbl);
+  // Low→High labels on Y
+  svg.appendChild(svel('text',{x:ML-10,y:cellY(1)+CH-4,'text-anchor':'end','font-family':F,'font-size':9,fill:'#b0a090'},'harvinainen'));
+  svg.appendChild(svel('text',{x:ML-10,y:cellY(5)+8,'text-anchor':'end','font-family':F,'font-size':9,fill:'#b0a090'},'lähes varma'));
+
+  // X-axis number labels
+  for(let v=1;v<=5;v++) {
+    svg.appendChild(svel('text',{x:cellX(v)+CW/2,y:MT+5*CH+20,'text-anchor':'middle','font-family':F,'font-size':13,'font-weight':600,fill:'#53190A'},String(v)));
+  }
+  // X-axis title
+  svg.appendChild(svel('text',{x:ML+5*CW/2,y:SVG_H-6,'text-anchor':'middle','font-family':F,'font-size':10,'font-weight':600,fill:'#9a8a80','letter-spacing':1.5},'VAIKUTUS'));
+  // Low→High labels on X
+  svg.appendChild(svel('text',{x:cellX(1)+4,y:MT+5*CH+20,'text-anchor':'start','font-family':F,'font-size':9,fill:'#b0a090'},'vähäinen'));
+  svg.appendChild(svel('text',{x:cellX(5)+CW-4,y:MT+5*CH+20,'text-anchor':'end','font-family':F,'font-size':9,fill:'#b0a090'},'katastrofaalinen'));
+
+  // Group risks by cell
+  const byCell = {};
+  risks.forEach(r=>{
+    const k=`${r.p},${r.v}`;
+    if(!byCell[k])byCell[k]=[];
+    byCell[k].push(r);
+  });
+
+  // Draw risk circles
+  for(const[key,cellRisks]of Object.entries(byCell)){
+    const[p,v]=key.split(',').map(Number);
+    const cx=cellX(v)+CW/2, cy=cellY(p)+CH/2;
+    const positions=calcPositions(cellRisks.length,cx,cy);
+    cellRisks.forEach((risk,i)=>{
+      const pos=positions[i];
+      const color=dotColor(risk.p,risk.v);
+      const g=document.createElementNS(NS,'g');
+      g.style.cursor='pointer';
+      g.appendChild(svel('circle',{cx:pos.x,cy:pos.y,r:RISK_R,fill:color,stroke:'white','stroke-width':2}));
+      g.appendChild(svel('text',{x:pos.x,y:pos.y+4,'text-anchor':'middle','font-family':F,'font-size':11,'font-weight':700,fill:'white','pointer-events':'none'},String(risk.num)));
+      g.addEventListener('mouseenter',e=>showTip(e,risk));
+      g.addEventListener('mousemove',moveTip);
+      g.addEventListener('mouseleave',hideTip);
+      svg.appendChild(g);
+    });
+  }
+
+  // Risk reference table
+  const tbody = document.getElementById('riskTableBody');
+  tbody.innerHTML = '';
+  risks.forEach(r=>{
+    const s=score(r.p,r.v);
+    const sl=scoreLabel(s);
+    const color=dotColor(r.p,r.v);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="risk-num" style="background:${color}">${r.num}</span></td>
+      <td>
+        <div class="risk-name">${esc(r.riski)}</div>
+        ${r.omistaja?`<div class="risk-owner">👤 ${esc(r.omistaja)}</div>`:''}
+        ${r.toimenpide?`<div class="risk-action">→ ${esc(r.toimenpide)}</div>`:''}
+      </td>
+      <td style="white-space:nowrap">
+        <span class="score-badge" style="background:${sl.bg};color:${sl.fg}">${s} · ${sl.text}</span>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">T${r.p} × V${r.v}</div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Tooltip ──────────────────────────────────────────────────
+const tip = document.getElementById('tooltip');
+function showTip(e, r) {
+  const s=score(r.p,r.v), sl=scoreLabel(s);
+  tip.innerHTML=`<strong>${esc(r.riski)}</strong>
+    <span class="tt-row">Todennäköisyys: ${r.p} · Vaikutus: ${r.v} · Pisteet: ${s} (${sl.text})</span>
+    ${r.omistaja?`<span class="tt-row">Omistaja: ${esc(r.omistaja)}</span>`:''}
+    ${r.toimenpide?`<span class="tt-row">Toimenpide: ${esc(r.toimenpide)}</span>`:''}`;
+  tip.classList.add('show');
+  moveTip(e);
+}
+function moveTip(e) {
+  const x=e.clientX+14, y=e.clientY-10;
+  tip.style.left=(x+tip.offsetWidth>window.innerWidth?x-tip.offsetWidth-24:x)+'px';
+  tip.style.top=y+'px';
+}
+function hideTip() { tip.classList.remove('show'); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── File loading ─────────────────────────────────────────────
+let exportFilename = 'riskimatriisi';
+
+function loadFile(file) {
+  clearError();
+  exportFilename = file.name.replace(/\.[^.]+$/, '');
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const raw = parseCSV(e.target.result);
+      const risks = normalizeRows(raw);
+      renderMatrix(risks);
+      document.getElementById('dropzone').style.display = 'none';
+      document.getElementById('chartCard').style.display = 'block';
+      document.getElementById('reloadBtn').disabled = false;
+      document.getElementById('printBtn').disabled = false;
+      document.getElementById('svgBtn').disabled = false;
+      document.getElementById('pngBtn').disabled = false;
+      document.getElementById('footerNote').textContent = file.name + ' — ' + risks.length + ' riskiä';
+    } catch(err) { showError(err.message); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── Drop zone events ─────────────────────────────────────────
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+dropzone.addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change', e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
+dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', ()=>dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e=>{ e.preventDefault(); dropzone.classList.remove('drag-over'); if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+document.getElementById('reloadBtn').addEventListener('click', ()=>{
+  document.getElementById('chartCard').style.display = 'none';
+  document.getElementById('dropzone').style.display = '';
+  document.getElementById('footerNote').textContent = '';
+  ['reloadBtn','printBtn','svgBtn','pngBtn'].forEach(id=>document.getElementById(id).disabled=true);
+  fileInput.value = '';
+});
+
+// ── Print ────────────────────────────────────────────────────
+document.getElementById('printBtn').addEventListener('click', ()=>{
+  const svgEl = document.getElementById('chart');
+  if(!svgEl) return;
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Riskimatriisi</title><style>@page{margin:10mm}body{margin:0;background:white}svg{max-width:100%;display:block}</style></head><body>${svgEl.outerHTML}</body></html>`);
+  win.document.close();
+  win.print();
+  setTimeout(()=>win.close(),500);
+});
+
+// ── Export helpers ───────────────────────────────────────────
+function buildExportSVG() {
+  const src = document.getElementById('chart');
+  const padT=48, padB=20, padX=20;
+  const w = SVG_W + padX*2;
+  const h = SVG_H + padT + padB;
+  const F = 'Montserrat,sans-serif';
+  const wrapper = svel('svg',{xmlns:NS,width:w,height:h,viewBox:`0 0 ${w} ${h}`});
+  wrapper.appendChild(svel('rect',{width:w,height:h,fill:'#ffffff'}));
+  wrapper.appendChild(svel('text',{x:padX,y:30,'font-family':'Bricolage Grotesque,sans-serif','font-size':20,'font-weight':700,fill:'#53190A'},exportFilename));
+  const g = document.createElementNS(NS,'g');
+  g.setAttribute('transform',`translate(${padX},${padT})`);
+  g.innerHTML = src.innerHTML;
+  wrapper.appendChild(g);
+  return { wrapper, w, h };
+}
+
+// ── SVG export ───────────────────────────────────────────────
+document.getElementById('svgBtn').addEventListener('click', ()=>{
+  const {wrapper} = buildExportSVG();
+  const blob = new Blob([wrapper.outerHTML],{type:'image/svg+xml;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = exportFilename+'.svg';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+// ── PNG export ───────────────────────────────────────────────
+document.getElementById('pngBtn').addEventListener('click', ()=>{
+  const {wrapper,w,h} = buildExportSVG();
+  const xml = new XMLSerializer().serializeToString(wrapper);
+  const svg64 = 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(xml)));
+  const scale=2;
+  const canvas = document.createElement('canvas');
+  canvas.width=w*scale; canvas.height=h*scale;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(scale,scale);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,w,h);
+  const img = new Image();
+  img.onload=()=>{
+    ctx.drawImage(img,0,0);
+    canvas.toBlob(blob=>{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=exportFilename+'.png';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    });
+  };
+  img.src=svg64;
+});
+
+// ── Error helpers ────────────────────────────────────────────
+function showError(msg){ const e=document.getElementById('errorBanner'); e.textContent=msg; e.classList.remove('hidden'); }
+function clearError(){ document.getElementById('errorBanner').classList.add('hidden'); }
+</script>
+</body>
+</html>

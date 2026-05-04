@@ -1,0 +1,11 @@
+Riski,Todennäköisyys,Vaikutus,Omistaja,Toimenpide
+Avainhenkilön poistuminen projektista,3,5,Projektipäällikkö,Varahenkilösuunnitelma ja dokumentointi
+Toimittajan toimitus myöhästyy,4,4,Hankintavastaava,Viikoittainen tilannekatsaus toimittajan kanssa
+Vaatimusmäärittelyt muuttuvat kesken projektin,4,3,Liiketoiminta-analyytikko,Muutoshallintaprosessi käyttöön
+Integraatiotestaus paljastaa kriittisiä virheitä,3,5,Tekninen johtaja,Varhainen integraatiotestaus sprinteissä
+Budjetti ylittyy,3,4,Talousvastaava,Kuukausittainen budjettiseuranta
+Tietoturva-aukko järjestelmässä,2,5,Tietoturvapäällikkö,Penetraatiotestaus ennen käyttöönottoa
+Käyttäjäkoulutus jää puutteelliseksi,4,2,Muutosjohtaja,Koulutussuunnitelma ja -materiaali
+Tekninen velka hidastaa kehitystä,3,3,Arkkitehti,Refaktorointibudjetti jokaiseen sprinttiin
+Riippuvuus vanhentuneesta teknologiasta,2,4,Arkkitehti,Teknologiakartoitus ja migraatiosuunnitelma
+Järjestelmän suorituskyky ei täytä vaatimuksia,2,4,Tekninen johtaja,Suorituskykytestaus jo kehitysvaiheessa

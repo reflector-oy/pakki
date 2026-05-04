@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projektin aikataulu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+ :root {
+ --bg: #F8F3EC;
+ --card: #ffffff;
+ --ink: #551500;
+ --ink-2: #4a4a4a;
+ --muted: #8a8a8a;
+ --line: #e7e5df;
+ --line-soft: #f0eee8;
+ --accent: #F25B11;
+ --today: #c0392b;
+ 
+ --size-s: #4f8a6b;
+ --size-m: #3b6cb0;
+ --size-l: #c47b1f;
+ --size-xl: #7c3aed;
+ 
+ --row-h: 52px;
+ --left-col: 280px;
+ --month-w: 96px;
+ }
+ 
+ * { box-sizing: border-box; }
+ html, body { margin: 0; padding: 0; }
+ 
+ body {
+ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+ background: var(--bg);
+ color: var(--ink);
+ font-size: 14px;
+ line-height: 1.45;
+ min-height: 100vh;
+ -webkit-font-smoothing: antialiased;
+ }
+ 
+ .page {
+ max-width: 1600px;
+ margin: 0 auto;
+ padding: 32px 32px 64px;
+ }
+ 
+ /* Header */
+ header.app-header {
+ display: flex;
+ align-items: flex-end;
+ justify-content: space-between;
+ gap: 32px;
+ margin-bottom: 24px;
+ padding-bottom: 20px;
+ border-bottom: 1px solid var(--line);
+ }
+ .title-block h1 {
+ font-size: 28px;
+ font-weight: 700;
+ margin: 0 0 6px;
+ letter-spacing: -0.01em;
+ color: var(--ink);
+ }
+ h1[contenteditable] {
+ cursor: text;
+ border-radius: 4px;
+ padding: 2px 6px;
+ margin: -2px -6px;
+ outline: none;
+ transition: background 0.15s;
+ }
+ h1[contenteditable]:hover { background: rgba(0,0,0,0.04); }
+ h1[contenteditable]:focus {
+ background: rgba(242,91,17,0.07);
+ box-shadow: 0 0 0 2px rgba(242,91,17,0.22);
+ }
+ .title-block .subtitle {
+ color: var(--muted);
+ font-size: 13px;
+ font-weight: 500;
+ letter-spacing: 0.02em;
+ text-transform: uppercase;
+ }
+ .actions {
+ display: flex;
+ gap: 8px;
+ flex-wrap: wrap;
+ }
+ button.btn {
+ font-family: inherit;
+ font-size: 13px;
+ font-weight: 500;
+ padding: 8px 14px;
+ border-radius: 6px;
+ border: 1px solid var(--line);
+ background: var(--card);
+ color: var(--ink-2);
+ cursor: pointer;
+ transition: all 0.15s ease;
+ }
+ button.btn:hover { background: #faf9f5; border-color: #d6d3cc; color: var(--ink); }
+ button.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+ button.btn.primary:hover { background: #d44d0d; }
+ button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+ 
+ /* Legend strip */
+ .legend {
+ display: flex;
+ align-items: center;
+ gap: 24px;
+ flex-wrap: wrap;
+ padding: 14px 20px;
+ background: var(--card);
+ border: 1px solid var(--line);
+ border-radius: 8px;
+ margin-bottom: 16px;
+ font-size: 13px;
+ }
+ .legend-label {
+ color: var(--muted);
+ font-weight: 600;
+ text-transform: uppercase;
+ font-size: 11px;
+ letter-spacing: 0.06em;
+ margin-right: 4px;
+ }
+ .legend-item {
+ display: inline-flex;
+ align-items: center;
+ gap: 8px;
+ color: var(--ink-2);
+ }
+ .legend-swatch {
+ width: 14px;
+ height: 14px;
+ border-radius: 3px;
+ }
+ .legend-divider {
+ width: 1px;
+ align-self: stretch;
+ background: var(--line);
+ }
+ .legend-today {
+ display: inline-flex;
+ align-items: center;
+ gap: 8px;
+ color: var(--ink-2);
+ }
+ .legend-today::before {
+ content: '';
+ display: inline-block;
+ width: 2px;
+ height: 14px;
+ background: var(--today);
+ }
+ 
+ /* Chart card */
+ .chart-card {
+ background: var(--card);
+ border: 1px solid var(--line);
+ border-radius: 10px;
+ padding: 0;
+ overflow: hidden;
+ box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 16px rgba(0,0,0,0.03);
+ }
+ .chart-scroll {
+ overflow-x: auto;
+ overflow-y: hidden;
+ }
+ .chart-svg {
+ display: block;
+ font-family: inherit;
+ }
+ 
+ /* Empty / drop state */
+ .dropzone {
+ background: var(--card);
+ border: 2px dashed #c9c5b9;
+ border-radius: 12px;
+ padding: 80px 40px;
+ text-align: center;
+ cursor: pointer;
+ transition: all 0.2s ease;
+ }
+ .dropzone:hover, .dropzone.drag {
+ border-color: var(--accent);
+ background: #fef5f0;
+ }
+ .dropzone .drop-icon {
+ width: 56px; height: 56px;
+ margin: 0 auto 16px;
+ border-radius: 50%;
+ background: #fde8da;
+ display: grid; place-items: center;
+ color: var(--accent);
+ }
+ .dropzone h2 {
+ font-size: 18px;
+ font-weight: 600;
+ margin: 0 0 8px;
+ color: var(--ink);
+ }
+ .dropzone p { color: var(--muted); margin: 0 0 16px; font-size: 13px; }
+ .dropzone code {
+ background: var(--line-soft);
+ padding: 2px 6px;
+ border-radius: 4px;
+ font-size: 12px;
+ color: var(--ink-2);
+ }
+ .dropzone .columns {
+ margin-top: 16px;
+ font-size: 12px;
+ color: var(--muted);
+ }
+ 
+ .col-guide {
+ margin: 14px auto 0;
+ border-collapse: collapse;
+ font-size: 12px;
+ text-align: left;
+ }
+ .col-guide thead th {
+ color: var(--muted);
+ font-weight: 600;
+ text-transform: uppercase;
+ font-size: 10px;
+ letter-spacing: 0.06em;
+ padding: 0 16px 5px 0;
+ border-bottom: 1px solid var(--line);
+ }
+ .col-guide tbody td {
+ padding: 4px 16px 4px 0;
+ color: var(--ink-2);
+ vertical-align: top;
+ }
+ .col-guide tbody tr:last-child td { padding-bottom: 0; }
+ .col-guide .req { color: var(--accent); font-weight: 700; font-size: 11px; } 
+ .col-guide .col-values { color: var(--muted); }
+ 
+ .reflector-brand {
+ display: flex;
+ align-items: center;
+ gap: 7px;
+ padding-left: 14px;
+ border-left: 1px solid var(--line);
+ color: var(--accent);
+ font-weight: 700;
+ font-size: 15px;
+ letter-spacing: -0.02em;
+ white-space: nowrap;
+ user-select: none;
+ }
+ .hidden { display: none !important; }
+ 
+ .error-banner {
+ background: #fef2f2;
+ border: 1px solid #fecaca;
+ color: #991b1b;
+ padding: 12px 16px;
+ border-radius: 8px;
+ margin-bottom: 16px;
+ font-size: 13px;
+ }
+ 
+ /* SVG element styling */
+ .grid-line { stroke: #efece5; stroke-width: 1; }
+ .grid-line.quarter { stroke: #d8d4ca; stroke-width: 1; }
+ .grid-line.month { stroke: #ebe8e0; stroke-width: 1; }
+ .grid-line.row { stroke: #f3f1eb; stroke-width: 1; }
+ .row-bg-alt { fill: #fbfaf6; }
+ .axis-text { fill: var(--muted); font-size: 11px; font-weight: 500; }
+ .axis-text.month-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; }
+ .axis-text.quarter-label {
+ fill: var(--ink); font-size: 12px; font-weight: 700;
+ text-transform: uppercase; letter-spacing: 0.06em;
+ }
+ .row-name { fill: var(--ink); font-size: 13px; font-weight: 600; }
+ .row-meta { fill: var(--muted); font-size: 11px; font-weight: 500; }
+ 
+ .bar {
+ rx: 5; ry: 5;
+ cursor: pointer;
+ transform-box: fill-box;
+ transform-origin: left center;
+ animation: barSlideIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+ transition: filter 0.18s ease;
+ }
+ .bar:hover {
+ filter: brightness(1.1) drop-shadow(0 3px 9px rgba(0,0,0,0.2));
+ }
+ @keyframes barSlideIn {
+ from { opacity: 0; transform: scaleX(0); }
+ to { opacity: 1; transform: scaleX(1); }
+ }
+ .bar-shadow { fill: rgba(0,0,0,0.08); }
+ .bar-label { fill: white; font-size: 11px; font-weight: 600; pointer-events: none; }
+ .bar-duration { fill: var(--muted); font-size: 11px; font-weight: 500; }
+ .size-badge {
+ font-size: 10px; font-weight: 700; fill: white;
+ text-anchor: middle;
+ pointer-events: none;
+ }
+ .size-badge-bg { rx: 3; ry: 3; opacity: 0.85; }
+ 
+ .today-line { stroke: var(--today); stroke-width: 1.5; stroke-dasharray: 4 3; }
+ .today-label {
+ fill: var(--today); font-size: 10px; font-weight: 700;
+ text-transform: uppercase; letter-spacing: 0.05em;
+ }
+ 
+ .left-col-bg { fill: #fafaf7; }
+ .left-col-divider { stroke: var(--line); stroke-width: 1; }
+ .header-row-bg { fill: #fbfaf6; }
+ 
+ /* Tooltip */
+ .tt {
+ position: fixed;
+ background: var(--ink);
+ color: white;
+ padding: 8px 12px;
+ border-radius: 6px;
+ font-size: 12px;
+ pointer-events: none;
+ transform: translate(-50%, calc(-100% - 10px));
+ white-space: nowrap;
+ box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+ z-index: 100;
+ opacity: 0;
+ transition: opacity 0.12s ease;
+ }
+ .tt.show { opacity: 1; }
+ .tt strong { display: block; margin-bottom: 4px; font-weight: 600; }
+ .tt .tt-row { color: #d4d4d4; font-size: 11px; }
+ 
+ .footer-note {
+ margin-top: 18px;
+ color: var(--muted);
+ font-size: 11px;
+ text-align: right;
+ }
+ 
+ /* Print */
+ @media print {
+ body { background: white; }
+ .page { padding: 0; max-width: none; }
+ .actions, .dropzone { display: none !important; }
+ .chart-card { box-shadow: none; border-color: #ccc; }
+ @page { size: A3 landscape; margin: 12mm; }
+ }
+</style>
+</head>
+<body>
+<div class="page">
+ <header class="app-header">
+ <div class="title-block">
+ <h1 id="projectTitle" contenteditable="true" spellcheck="false">Projektin aikataulu</h1>
+ <div class="subtitle" id="projectSubtitle">Projektin aikataulukatsaus</div>
+ </div>
+ <div class="actions">
+ <a href="../index.html" class="btn" style="text-decoration:none">← Pakki</a>
+ <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
+ <button class="btn" id="printBtn" disabled>Tulosta</button>
+ <button class="btn primary" id="pngBtn" disabled>Lataa PNG</button>
+ <div class="reflector-brand">Reflector</div>
+ </div>
+ </header>
+ 
+ <div id="errorBanner" class="error-banner hidden"></div>
+ 
+ <div id="legend" class="legend hidden">
+ <span class="legend-label">Suuruusluokka</span>
+ <span class="legend-item"><span class="legend-swatch" style="background: var(--size-s)"></span> S — pieni</span>
+ <span class="legend-item"><span class="legend-swatch" style="background: var(--size-m)"></span> M — keskikokoinen</span>
+ <span class="legend-item"><span class="legend-swatch" style="background: var(--size-l)"></span> L — suuri</span>
+ <span class="legend-item"><span class="legend-swatch" style="background: var(--size-xl)"></span> XL — erittäin suuri</span>
+ <span class="legend-divider"></span>
+ <span class="legend-today" id="todayLabel">Tämä päivä</span>
+ <span class="legend-divider hidden" id="progressLegendDivider"></span>
+ <span class="legend-item hidden" id="progressLegend">
+ <span class="legend-swatch" style="background: linear-gradient(to right, #2a4e3d 50%, #4f8a6b 50%)"></span>
+ Edistyminen
+ </span>
+ </div>
+ 
+ <div id="chartContainer" class="chart-card hidden">
+ <div class="chart-scroll">
+ <svg id="chart" class="chart-svg"></svg>
+ </div>
+ </div>
+ 
+ <div id="dropzone" class="dropzone">
+ <div class="drop-icon">
+ <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+ <polyline points="17 8 12 3 7 8"/>
+ <line x1="12" y1="3" x2="12" y2="15"/>
+ </svg>
+ </div>
+ <h2>Pudota CSV-tiedosto tähän</h2>
+ <p>tai <strong>klikkaa valitaksesi tiedoston</strong></p>
+ <p>Tuetut sarakkeet (suomeksi tai englanniksi):</p>
+ <table class="col-guide">
+ <thead>
+ <tr><th>Sarake</th><th>Kuvaus</th><th>Hyväksytyt arvot</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><code>Nimi</code> <span class="req">*</span></td>
+ <td>Tehtävän nimi</td>
+ <td class="col-values">Vapaateksti</td>
+ </tr>
+ <tr>
+ <td><code>Alkupaiva</code> <span class="req">*</span></td>
+ <td>Alkupäivämäärä</td>
+ <td class="col-values">2026-01-15 tai 15.1.2026</td>
+ </tr>
+ <tr>
+ <td><code>Loppupaiva</code> <span class="req">*</span></td>
+ <td>Loppupäivämäärä</td>
+ <td class="col-values">2026-01-15 tai 15.1.2026</td>
+ </tr>
+ <tr>
+ <td><code>Suuruusluokka</code></td>
+ <td>Työn koko</td>
+ <td class="col-values">S · M · L · XL</td>
+ </tr>
+ <tr>
+ <td><code>Tikettinumero</code></td>
+ <td>Viitetunnus</td>
+ <td class="col-values">Vapaateksti, esim. INT-1042</td>
+ </tr>
+ <tr>
+ <td><code>Edistyminen</code></td>
+ <td>Valmistumisaste</td>
+ <td class="col-values">Luku 0–100</td>
+ </tr>
+ </tbody>
+ </table>
+ <p style="font-size:11px;color:var(--muted);margin:6px 0 0"><span style="color:var(--accent);font-weight:700">*</span> pakollinen sarake</p> 
+ <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none">
+ <div class="columns" style="margin-top:12px">
+ <a href="integraatioiden_aikataulu.csv" download onclick="event.stopPropagation()">Lataa esimerkkitiedosto</a>
+ </div>
+ </div>
+ 
+ <div class="footer-note" id="footerNote"></div>
+</div>
+ 
+<div class="tt" id="tooltip"></div>
+ 
+<script>
+// ============================================================
+// CSV parsing
+// ============================================================
+function parseCSV(text) {
+ // strip BOM
+ if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+ 
+ // detect delimiter from header line (comma vs semicolon vs tab)
+ const firstLine = text.split(/\r?\n/, 1)[0] || '';
+ const counts = { ',': (firstLine.match(/,/g)||[]).length,
+ ';': (firstLine.match(/;/g)||[]).length,
+ '\t': (firstLine.match(/\t/g)||[]).length };
+ const delim = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+ 
+ const rows = [];
+ let row = [], field = '', inQuotes = false;
+ for (let i = 0; i < text.length; i++) {
+ const c = text[i];
+ if (inQuotes) {
+ if (c === '"') {
+ if (text[i+1] === '"') { field += '"'; i++; }
+ else inQuotes = false;
+ } else field += c;
+ } else {
+ if (c === '"') inQuotes = true;
+ else if (c === delim) { row.push(field); field = ''; }
+ else if (c === '\n') { row.push(field); rows.push(row); row=[]; field=''; } 
+ else if (c === '\r') { /* skip */ }
+ else field += c;
+ }
+ }
+ if (field.length || row.length) { row.push(field); rows.push(row); }
+ 
+ // remove trailing empty rows
+ while (rows.length && rows[rows.length-1].every(c => !c || !c.trim())) rows.pop();
+ if (!rows.length) return [];
+ 
+ const headers = rows[0].map(h => h.trim());
+ return rows.slice(1).map(r => {
+ const o = {};
+ headers.forEach((h, i) => { o[h] = (r[i] || '').trim(); });
+ return o;
+ });
+}
+ 
+// ============================================================
+// Column normalization (Finnish + English aliases)
+// ============================================================
+const COLUMN_ALIASES = {
+ name: ['nimi', 'name', 'task', 'tehtava', 'tehtävä', 'title', 'otsikko'],
+ start: ['alkupaiva', 'alkupäivä', 'start', 'startdate', 'start_date', 'alku', 'alkaa'],
+ end: ['loppupaiva', 'loppupäivä', 'end', 'enddate', 'end_date', 'loppu', 'paattyy', 'päättyy'],
+ size: ['suuruusluokka', 'size', 'koko', 'tier'],
+ ticket: ['tikettinumero', 'ticket', 'ticketid', 'ticket_id', 'jira', 'tiketti'],
+ progress: ['progress', 'edistyminen', 'valmis', 'done', 'completion'],
+};
+ 
+function normalizeKey(k) {
+ return k.toLowerCase().replace(/[\s_\-]/g, '').replace(/ä/g,'a').replace(/ö/g,'o').replace(/å/g,'a');
+}
+ 
+function buildColumnMap(headers) {
+ const norm = headers.map(h => [h, normalizeKey(h)]);
+ const map = {};
+ for (const [field, aliases] of Object.entries(COLUMN_ALIASES)) {
+ const aliasSet = new Set(aliases.map(normalizeKey));
+ const found = norm.find(([_, n]) => aliasSet.has(n));
+ if (found) map[field] = found[0];
+ }
+ return map;
+}
+ 
+function normalizeRows(rawRows) {
+ if (!rawRows.length) return [];
+ const headers = Object.keys(rawRows[0]);
+ const map = buildColumnMap(headers);
+ if (!map.name || !map.start || !map.end) {
+ throw new Error('CSV:stä puuttuu pakollinen sarake. Tarvitaan: Nimi, Alkupaiva, Loppupaiva. Löydetyt sarakkeet: ' + headers.join(', '));
+ }
+ return rawRows
+ .filter(r => (r[map.name] || '').trim())
+ .map(r => ({
+ name: r[map.name].trim(),
+ start: parseDate(r[map.start]),
+ end: parseDate(r[map.end]),
+ size: ((r[map.size] || '') + '').trim().toUpperCase() || null,
+ ticket: ((r[map.ticket] || '') + '').trim() || null,
+ progress: map.progress !== undefined
+ ? Math.min(100, Math.max(0, parseFloat(r[map.progress]) || 0))
+ : null,
+ }))
+ .filter(t => t.start && t.end);
+}
+ 
+// ============================================================
+// Date helpers
+// ============================================================
+function parseDate(s) {
+ if (!s) return null;
+ s = ('' + s).trim();
+ // ISO: 2026-01-15
+ let m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
+ if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+ // FI: 15.1.2026 or 15.01.2026
+ m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(s);
+ if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+ // US: 1/15/2026
+ m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
+ if (m) return new Date(+m[3], +m[1]-1, +m[2]);
+ // fallback
+ const d = new Date(s);
+ return isNaN(d) ? null : d;
+}
+ 
+function fmtDateFi(d) {
+ return `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
+}
+function diffDays(a, b) {
+ return Math.round((b - a) / 86400000);
+}
+function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); } 
+function nextMonth(d) { return new Date(d.getFullYear(), d.getMonth()+1, 1); } 
+function quarterOf(d) { return Math.floor(d.getMonth() / 3) + 1; }
+ 
+const MONTH_ABBR_FI = ['Tam','Hel','Maa','Huh','Tou','Kes','Hei','Elo','Syy','Lok','Mar','Jou'];
+const MONTH_FULL_FI = ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu',
+ 'Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'];
+const DAY_ABBR_FI = ['Su','Ma','Ti','Ke','To','Pe','La']; // index = getDay() 
+const TICK_W = { day: 34, week: 72, month: 96 };
+ 
+function startOfWeek(d) {
+ const delta = (d.getDay() === 0) ? 6 : d.getDay() - 1;
+ return new Date(d.getFullYear(), d.getMonth(), d.getDate() - delta);
+}
+function isoWeekNumber(d) {
+ const thu = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 3 - ((d.getDay() + 6) % 7));
+ const yearStart = new Date(thu.getFullYear(), 0, 1);
+ return 1 + Math.round((thu - yearStart) / 604800000);
+}
+function selectScale(rawDays) {
+ if (rawDays <= 42) return 'day';
+ if (rawDays <= 180) return 'week';
+ return 'month';
+}
+function buildRangeBounds(minStart, maxEnd, scale) {
+ if (scale === 'month') {
+ return { rangeStart: startOfMonth(minStart), rangeEnd: nextMonth(maxEnd) }; 
+ }
+ return { rangeStart: startOfWeek(minStart), rangeEnd: addDays(startOfWeek(maxEnd), 7) };
+}
+function buildTicks(rangeStart, rangeEnd, scale) {
+ const ticks = [];
+ let cur = new Date(rangeStart);
+ const step = scale === 'day' ? 1 : scale === 'week' ? 7 : 0;
+ while (cur < rangeEnd) {
+ ticks.push(new Date(cur));
+ cur = step ? addDays(cur, step) : nextMonth(cur);
+ }
+ return ticks;
+}
+ 
+// ============================================================
+// Rendering
+// ============================================================
+const SIZE_COLORS = {
+ S: 'var(--size-s)', M: 'var(--size-m)', L: 'var(--size-l)', XL: 'var(--size-xl)'
+};
+const SIZE_HEX = { S: '#4f8a6b', M: '#3b6cb0', L: '#c47b1f', XL: '#7c3aed' }; 
+ 
+function colorFor(size) {
+ return SIZE_HEX[size] || '#5b6470';
+}
+ 
+function darken(hex) {
+ return '#' + [1,3,5].map(i => Math.max(0, Math.round(parseInt(hex.slice(i,i+2),16) * 0.62))
+ .toString(16).padStart(2,'0')).join('');
+}
+ 
+function renderGantt(tasks) {
+ const svg = document.getElementById('chart');
+ svg.innerHTML = '';
+ 
+ // Compute timeline range, scale-aware
+ const minStart = tasks.reduce((a, t) => t.start < a ? t.start : a, tasks[0].start);
+ const maxEnd = tasks.reduce((a, t) => t.end > a ? t.end : a, tasks[0].end);
+ const rawDays = diffDays(minStart, maxEnd) + 1;
+ const scale = selectScale(rawDays);
+ const { rangeStart, rangeEnd } = buildRangeBounds(minStart, maxEnd, scale); 
+ const totalDays = diffDays(rangeStart, rangeEnd);
+ 
+ // Layout constants
+ const leftCol = 280;
+ const headerRows = 56;
+ const rowH = 52;
+ const padRight = 24;
+ 
+ // Build tick list (one entry per column)
+ const tickW = TICK_W[scale];
+ const ticks = buildTicks(rangeStart, rangeEnd, scale);
+ const chartW = ticks.length * tickW;
+ const totalW = leftCol + chartW + padRight;
+ const totalH = headerRows + tasks.length * rowH + 24;
+ 
+ svg.setAttribute('width', totalW);
+ svg.setAttribute('height', totalH);
+ svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+ 
+ const ns = 'http://www.w3.org/2000/svg';
+ const el = (tag, attrs = {}, text = null) => {
+ const e = document.createElementNS(ns, tag);
+ for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+ if (text != null) e.textContent = text;
+ return e;
+ };
+ 
+ const defs = el('defs');
+ svg.appendChild(defs);
+ 
+ // Background for left column
+ svg.appendChild(el('rect', { x: 0, y: 0, width: leftCol, height: totalH, class: 'left-col-bg' }));
+ // Background for header band
+ svg.appendChild(el('rect', { x: leftCol, y: 0, width: chartW, height: headerRows, class: 'header-row-bg' }));
+ 
+ // Two-row header: major groups (top) + minor ticks (bottom)
+ const majorRowH = 24;
+ const minorRowH = headerRows - majorRowH; // 32
+ 
+ function getMajorKey(tick) {
+ if (scale === 'day') return `${tick.getFullYear()}-W${isoWeekNumber(tick)}`; 
+ if (scale === 'week') return `${tick.getFullYear()}-${tick.getMonth()}`;
+ return `Q${quarterOf(tick)}-${tick.getFullYear()}`;
+ }
+ function getMajorLabel(tick) {
+ if (scale === 'day') return `V${isoWeekNumber(tick)} ${tick.getFullYear()}`; 
+ if (scale === 'week') return `${MONTH_FULL_FI[tick.getMonth()]} ${tick.getFullYear()}`;
+ return `Q${quarterOf(tick)} ${tick.getFullYear()}`;
+ }
+ function getMinorLabel(tick) {
+ if (scale === 'day') return String(tick.getDate());
+ if (scale === 'week') return `V${isoWeekNumber(tick)}`;
+ return MONTH_ABBR_FI[tick.getMonth()];
+ }
+ 
+ // Top row: major group labels + dividers
+ let groupStart = 0;
+ for (let i = 0; i <= ticks.length; i++) {
+ const prev = ticks[i - 1], curr = ticks[i];
+ const sameGroup = prev && curr && getMajorKey(curr) === getMajorKey(prev);
+ if (i > 0 && (!sameGroup || i === ticks.length)) {
+ const x0 = leftCol + groupStart * tickW;
+ const w = (i - groupStart) * tickW;
+ svg.appendChild(el('text', {
+ x: x0 + w / 2, y: 16, class: 'axis-text quarter-label',
+ 'text-anchor': 'middle'
+ }, getMajorLabel(prev)));
+ if (i < ticks.length) {
+ svg.appendChild(el('line', {
+ x1: leftCol + i * tickW, y1: 0,
+ x2: leftCol + i * tickW, y2: totalH,
+ class: 'grid-line quarter'
+ }));
+ }
+ groupStart = i;
+ }
+ }
+ 
+ // Bottom row: minor tick labels + grid lines
+ ticks.forEach((tick, i) => {
+ const x = leftCol + i * tickW;
+ if (i > 0) {
+ svg.appendChild(el('line', {
+ x1: x, y1: majorRowH, x2: x, y2: totalH,
+ class: 'grid-line month'
+ }));
+ }
+ svg.appendChild(el('text', {
+ x: x + tickW / 2, y: majorRowH + minorRowH / 2 + 4,
+ class: 'axis-text month-label',
+ 'text-anchor': 'middle'
+ }, getMinorLabel(tick)));
+ });
+ 
+ // Header bottom border
+ svg.appendChild(el('line', {
+ x1: 0, y1: headerRows, x2: totalW, y2: headerRows,
+ class: 'left-col-divider'
+ }));
+ // Left column divider
+ svg.appendChild(el('line', {
+ x1: leftCol, y1: 0, x2: leftCol, y2: totalH,
+ class: 'left-col-divider'
+ }));
+ 
+ const dayToX = (d) => {
+ if (scale === 'month') {
+ // Month columns are equal-width but months have unequal day counts,
+ // so interpolate within each month rather than linearly across the whole range.
+ const idx = ticks.findIndex((t, i) =>
+ t <= d && (i === ticks.length - 1 || d < ticks[i + 1])
+ );
+ if (idx === -1) return leftCol;
+ const mStart = ticks[idx];
+ const mEnd = idx + 1 < ticks.length ? ticks[idx + 1] : rangeEnd;
+ return leftCol + (idx + diffDays(mStart, d) / diffDays(mStart, mEnd)) * tickW; 
+ }
+ return leftCol + (diffDays(rangeStart, d) / totalDays) * chartW;
+ };
+ 
+ const today = new Date();
+ today.setHours(0, 0, 0, 0);
+ 
+ // Pass 1: row backgrounds (must come before weekend shading)
+ tasks.forEach((t, i) => {
+ const y = headerRows + i * rowH;
+ if (i % 2 === 1) {
+ svg.appendChild(el('rect', {
+ x: 0, y, width: totalW, height: rowH, class: 'row-bg-alt'
+ }));
+ }
+ svg.appendChild(el('line', {
+ x1: 0, y1: y + rowH, x2: totalW, y2: y + rowH, class: 'grid-line row'
+ }));
+ });
+ 
+ // Weekend column shading (day scale only)
+ if (scale === 'day') {
+ ticks.forEach((tick, i) => {
+ if (tick.getDay() === 0 || tick.getDay() === 6) {
+ svg.appendChild(el('rect', {
+ x: leftCol + i * tickW, y: headerRows,
+ width: tickW, height: totalH - headerRows,
+ fill: 'rgba(0,0,0,0.035)'
+ }));
+ }
+ });
+ }
+ 
+ // Today band (current period, all scales)
+ if (today >= rangeStart && today < rangeEnd) {
+ const todayIdx = ticks.findIndex((t, i) =>
+ t <= today && (i === ticks.length - 1 || today < ticks[i + 1]) 
+ );
+ if (todayIdx !== -1) {
+ svg.appendChild(el('rect', {
+ x: leftCol + todayIdx * tickW, y: 0,
+ width: tickW, height: totalH,
+ fill: 'rgba(192,57,43,0.06)'
+ }));
+ }
+ }
+ 
+ // Pass 2: row content
+ tasks.forEach((t, i) => {
+ const y = headerRows + i * rowH;
+ 
+ // Left column: task name + ticket / size badge
+ const nameY = y + rowH / 2 - 4;
+ const metaY = y + rowH / 2 + 12;
+ svg.appendChild(el('text', {
+ x: 20, y: nameY, class: 'row-name'
+ }, truncate(t.name, 32)));
+ const metaParts = [];
+ if (t.ticket) metaParts.push(t.ticket);
+ if (t.size) metaParts.push(`${t.size} · ${durationLabel(t.start, t.end)}`); 
+ else metaParts.push(durationLabel(t.start, t.end));
+ svg.appendChild(el('text', {
+ x: 20, y: metaY, class: 'row-meta'
+ }, metaParts.join(' · ')));
+ 
+ // Bar
+ const x1 = dayToX(t.start);
+ const x2 = dayToX(addDays(t.end, 1));
+ const barX = Math.round(x1);
+ const barW = Math.max(6, Math.round(x2 - x1));
+ const barH = 26;
+ const barY = y + (rowH - barH) / 2;
+ const fill = colorFor(t.size);
+ 
+ // shadow
+ svg.appendChild(el('rect', {
+ x: barX, y: barY + 2, width: barW, height: barH,
+ rx: 5, ry: 5, class: 'bar-shadow'
+ }));
+ const bar = el('rect', {
+ x: barX, y: barY, width: barW, height: barH,
+ rx: 5, ry: 5, fill, class: 'bar', role: 'button'
+ });
+ svg.appendChild(bar);
+ bar.style.animationDelay = `${i * 0.04}s`;
+ 
+ // progress indicator: dark fill on done portion, white wash on remaining
+ if (t.progress !== null) {
+ const clipId = `bc${i}`;
+ const cp = el('clipPath', { id: clipId });
+ cp.appendChild(el('rect', { x: barX, y: barY, width: barW, height: barH, rx: 5, ry: 5 }));
+ defs.appendChild(cp);
+ const doneW = Math.round(barW * (t.progress / 100));
+ if (t.progress > 0) {
+ svg.appendChild(el('rect', {
+ x: barX, y: barY, width: Math.max(1, doneW), height: barH,
+ fill: darken(fill), 'clip-path': `url(#${clipId})`, 'pointer-events': 'none' 
+ }));
+ }
+ if (t.progress < 100) {
+ svg.appendChild(el('rect', {
+ x: barX + doneW, y: barY, width: barW - doneW, height: barH,
+ fill: 'white', opacity: '0.48', 'clip-path': `url(#${clipId})`, 'pointer-events': 'none'
+ }));
+ }
+ }
+ 
+ // size badge on right end of bar
+ if (t.size && barW > 50) {
+ const badgeW = 22;
+ const badgeH = 16;
+ const bx = barX + barW - badgeW - 4;
+ const by = barY + (barH - badgeH) / 2;
+ svg.appendChild(el('rect', {
+ x: bx, y: by, width: badgeW, height: badgeH,
+ rx: 3, ry: 3, fill: 'rgba(0,0,0,0.18)', class: 'size-badge-bg'
+ }));
+ svg.appendChild(el('text', {
+ x: bx + badgeW / 2, y: by + badgeH / 2 + 4,
+ class: 'size-badge'
+ }, t.size));
+ }
+ 
+ // duration label inside or after bar
+ const days = diffDays(t.start, t.end) + 1;
+ const durTxt = `${days} pv`;
+ if (barW > 110) {
+ svg.appendChild(el('text', {
+ x: barX + 10, y: barY + barH/2 + 4, class: 'bar-label'
+ }, durTxt));
+ } else {
+ svg.appendChild(el('text', {
+ x: barX + barW + 8, y: barY + barH/2 + 4, class: 'bar-duration'
+ }, durTxt));
+ }
+ 
+ // tooltip handlers
+ bar.addEventListener('mouseenter', (e) => showTip(e, t));
+ bar.addEventListener('mousemove', (e) => moveTip(e));
+ bar.addEventListener('mouseleave', hideTip);
+ });
+ 
+ // Today line
+ if (today >= rangeStart && today <= rangeEnd) {
+ const tx = dayToX(today);
+ svg.appendChild(el('line', {
+ x1: tx, y1: 0, x2: tx, y2: totalH,
+ class: 'today-line'
+ }));
+ }
+ 
+ // Update subtitle and footer
+ document.getElementById('projectSubtitle').textContent =
+ `${tasks.length} työtä · ${fmtDateFi(minStart)} – ${fmtDateFi(maxEnd)}`;
+ document.getElementById('todayLabel').textContent = `Tänään: ${fmtDateFi(today)}`;
+ document.getElementById('footerNote').textContent =
+ `Luotu ${fmtDateFi(today)}`;
+ 
+ const hasProgress = tasks.some(t => t.progress !== null);
+ document.getElementById('progressLegendDivider').classList.toggle('hidden', !hasProgress);
+ document.getElementById('progressLegend').classList.toggle('hidden', !hasProgress);
+}
+ 
+function durationLabel(start, end) {
+ const days = diffDays(start, end) + 1;
+ if (days < 14) return `${days} pv`;
+ const weeks = Math.round(days / 7);
+ if (weeks < 9) return `${weeks} vk`;
+ const months = Math.round(days / 30.44);
+ return `${months} kk`;
+}
+ 
+function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+ 
+function truncate(s, n) {
+ if (!s) return '';
+ return s.length > n ? s.slice(0, n - 1) + '…' : s;
+}
+ 
+// ============================================================
+// Tooltip
+// ============================================================
+const tip = document.getElementById('tooltip');
+function showTip(e, t) {
+ const days = diffDays(t.start, t.end) + 1;
+ tip.innerHTML = `
+ <strong>${escapeHtml(t.name)}</strong>
+ <div class="tt-row">${fmtDateFi(t.start)} – ${fmtDateFi(t.end)} · ${days} päivää</div>
+ ${t.ticket ? `<div class="tt-row">Tiketti: ${escapeHtml(t.ticket)}</div>` : ''}
+ ${t.size ? `<div class="tt-row">Suuruusluokka: ${escapeHtml(t.size)}</div>` : ''}
+ ${t.progress !== null ? `<div class="tt-row">Edistyminen: ${t.progress} %</div>` : ''}
+ `;
+ tip.classList.add('show');
+ moveTip(e);
+}
+function moveTip(e) {
+ tip.style.left = e.clientX + 'px';
+ tip.style.top = e.clientY + 'px';
+}
+function hideTip() { tip.classList.remove('show'); }
+ 
+function escapeHtml(s) {
+ return ('' + s).replace(/[&<>"']/g, c => ({
+ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]));
+}
+ 
+// ============================================================
+// File handling
+// ============================================================
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const errorBanner = document.getElementById('errorBanner');
+ 
+function showError(msg) {
+ errorBanner.textContent = msg;
+ errorBanner.classList.remove('hidden');
+}
+function clearError() { errorBanner.classList.add('hidden'); }
+ 
+function loadFile(file) {
+ clearError();
+ if (!file) return;
+ const reader = new FileReader();
+ reader.onload = (e) => {
+ try {
+ const raw = parseCSV(e.target.result);
+ const tasks = normalizeRows(raw);
+ if (!tasks.length) {
+ showError('CSV:stä ei löytynyt yhtään validia tehtävää.');
+ return;
+ }
+ // Sort by start date
+ tasks.sort((a, b) => a.start - b.start);
+ renderGantt(tasks);
+ document.getElementById('chartContainer').classList.remove('hidden');
+ document.getElementById('legend').classList.remove('hidden');
+ document.getElementById('dropzone').classList.add('hidden');
+ document.getElementById('reloadBtn').disabled = false;
+ document.getElementById('printBtn').disabled = false;
+ document.getElementById('pngBtn').disabled = false;
+ } catch (err) {
+ console.error(err);
+ showError(err.message || 'CSV:n lukemisessa tapahtui virhe.');
+ }
+ };
+ reader.onerror = () => showError('Tiedoston lukeminen epäonnistui.');
+ reader.readAsText(file, 'UTF-8');
+}
+ 
+dropzone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => loadFile(e.target.files[0])); 
+ 
+['dragenter', 'dragover'].forEach(ev =>
+ dropzone.addEventListener(ev, (e) => {
+ e.preventDefault();
+ dropzone.classList.add('drag');
+ })
+);
+['dragleave', 'drop'].forEach(ev =>
+ dropzone.addEventListener(ev, (e) => {
+ e.preventDefault();
+ dropzone.classList.remove('drag');
+ })
+);
+dropzone.addEventListener('drop', (e) => {
+ const file = e.dataTransfer.files[0];
+ if (file) loadFile(file);
+});
+ 
+// Allow drop anywhere on the page after loading
+window.addEventListener('dragover', (e) => e.preventDefault());
+window.addEventListener('drop', (e) => {
+ e.preventDefault();
+ const file = e.dataTransfer.files[0];
+ if (file) loadFile(file);
+});
+ 
+document.getElementById('reloadBtn').addEventListener('click', () => {
+ document.getElementById('dropzone').classList.remove('hidden');
+ document.getElementById('chartContainer').classList.add('hidden');
+ document.getElementById('legend').classList.add('hidden');
+ document.getElementById('reloadBtn').disabled = true;
+ document.getElementById('printBtn').disabled = true;
+ document.getElementById('pngBtn').disabled = true;
+ document.getElementById('projectSubtitle').textContent = 'Projektin aikataulukatsaus';
+ fileInput.value = '';
+ clearError();
+});
+ 
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+ 
+document.getElementById('projectTitle').addEventListener('keydown', (e) => { 
+ if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+});
+ 
+// ============================================================
+// PNG export — serialize SVG to canvas
+// ============================================================
+document.getElementById('pngBtn').addEventListener('click', () => {
+ const svg = document.getElementById('chart');
+ const w = +svg.getAttribute('width');
+ const h = +svg.getAttribute('height');
+ 
+ // inline computed styles for the export (resolve CSS variables)
+ const clone = svg.cloneNode(true);
+ inlineStyles(svg, clone);
+ 
+ // Title block above the chart
+ const titleH = 80;
+ const wrapW = w + 60;
+ const wrapH = h + titleH + 40;
+ 
+ const wrapper = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); 
+ wrapper.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+ wrapper.setAttribute('width', wrapW);
+ wrapper.setAttribute('height', wrapH);
+ wrapper.setAttribute('viewBox', `0 0 ${wrapW} ${wrapH}`);
+ 
+ const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); 
+ bg.setAttribute('width', wrapW); bg.setAttribute('height', wrapH);
+ bg.setAttribute('fill', '#ffffff');
+ wrapper.appendChild(bg);
+ 
+ const title = document.createElementNS('http://www.w3.org/2000/svg', 'text'); 
+ title.setAttribute('x', 30); title.setAttribute('y', 38);
+ title.setAttribute('font-family', 'Inter, sans-serif');
+ title.setAttribute('font-size', '24'); title.setAttribute('font-weight', '700');
+ title.setAttribute('fill', '#1a1a1a');
+ title.textContent = document.getElementById('projectTitle').textContent;
+ wrapper.appendChild(title);
+ 
+ const sub = document.createElementNS('http://www.w3.org/2000/svg', 'text'); 
+ sub.setAttribute('x', 30); sub.setAttribute('y', 60);
+ sub.setAttribute('font-family', 'Inter, sans-serif');
+ sub.setAttribute('font-size', '12'); sub.setAttribute('font-weight', '500'); 
+ sub.setAttribute('fill', '#8a8a8a'); sub.setAttribute('letter-spacing', '0.05em');
+ sub.textContent = document.getElementById('projectSubtitle').textContent.toUpperCase();
+ wrapper.appendChild(sub);
+ 
+ // shift chart down
+ const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+ g.setAttribute('transform', `translate(30, ${titleH})`);
+ while (clone.firstChild) g.appendChild(clone.firstChild);
+ wrapper.appendChild(g);
+ 
+ const xml = new XMLSerializer().serializeToString(wrapper);
+ const svg64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(xml)));
+ 
+ const img = new Image();
+ img.onload = () => {
+ const scale = 2; // hi-dpi
+ const canvas = document.createElement('canvas');
+ canvas.width = wrapW * scale;
+ canvas.height = wrapH * scale;
+ const ctx = canvas.getContext('2d');
+ ctx.scale(scale, scale);
+ ctx.fillStyle = '#ffffff';
+ ctx.fillRect(0, 0, wrapW, wrapH);
+ ctx.drawImage(img, 0, 0);
+ canvas.toBlob((blob) => {
+ const a = document.createElement('a');
+ a.href = URL.createObjectURL(blob);
+ a.download = 'projektin-aikataulu.png';
+ a.click();
+ setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+ });
+ };
+ img.onerror = () => showError('PNG-vienti epäonnistui.');
+ img.src = svg64;
+});
+ 
+// Resolve CSS-variable colors to actual values for SVG export.
+function inlineStyles(srcRoot, dstRoot) {
+ const srcAll = srcRoot.querySelectorAll('*');
+ const dstAll = dstRoot.querySelectorAll('*');
+ const PROPS = ['fill', 'stroke', 'font-family', 'font-size', 'font-weight']; 
+ for (let i = 0; i < srcAll.length; i++) {
+ const cs = window.getComputedStyle(srcAll[i]);
+ const dst = dstAll[i];
+ PROPS.forEach(p => {
+ const v = cs.getPropertyValue(p);
+ if (v && v !== '' && v !== 'none' && v !== 'normal') { 
+ dst.setAttribute(p, v.trim());
+ }
+ });
+ // remove class to avoid stylesheet dependency
+ dst.removeAttribute('class');
+ }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Markdown Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600;12..96,700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="page">
+      <header class="app-header">
+        <div class="title-block">
+          <h1>Markdown muotoilija</h1>
+          <div class="subtitle">Markdown-esikatselu paikallisesti</div>
+          <div class="file-name" id="fileName">Ei tiedostoa valittuna</div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" onclick="location.href='../index.html'">&larr; Pakki</button>
+          <label class="toggle">
+            <input id="numberingToggle" type="checkbox" checked>
+            <span>Kappaleiden numerointi</span>
+          </label>
+          <button class="btn" type="button" id="reloadBtn" disabled>Vaihda tiedosto</button>
+          <button class="btn primary" type="button" id="printBtn" disabled>Tulosta</button>
+          <div class="reflector-brand">Reflector</div>
+        </div>
+      </header>
+
+      <div id="drop-hint" class="drop-hint" role="status">
+        <div class="drop-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <h2>Pudota Markdown-tiedosto t&auml;h&auml;n</h2>
+        <p>tai <strong>klikkaa valitaksesi tiedoston</strong></p>
+        <p>Tuetut tiedostot: <code>.md</code>, <code>.markdown</code> ja tekstitiedostot</p>
+        <p class="local-note">
+          Toimii kokonaan omalla koneellasi. Tiedostojasi ei l&auml;hetet&auml; palvelimelle, pilveen tai minnek&auml;&auml;n muualle.
+        </p>
+      </div>
+
+      <main id="preview" class="markdown-body" aria-live="polite"></main>
+    </div>
+    <input id="file-picker" type="file" accept=".md,.markdown,.mdown,.mkd,text/markdown,text/plain">
+  </body>
+</html>

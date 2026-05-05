@@ -61,6 +61,13 @@ Esimerkkitiedosto: [`riskimatriisi/esimerkki.csv`](riskimatriisi/esimerkki.csv)
 
 ---
 
+### Markdown muotoilija (`markdownpreview/`)
+
+Lataa (drag and drop) markdown tiedoston ja näyttää sen muotoiltuna.  
+Raahaa markdown (*.md) tiedosto hiirellä selaimen ruutuun. Uuden tiedoston voi raahata edellisen päälle.
+
+---
+
 ## Rakenne
 
 ```
@@ -74,6 +81,10 @@ pakki/
 ├── gitgraph/
 │   ├── index.html
 │   └── release_esimerkki.csv
+├── markdownpreview/
+│   ├── index.html
+│   ├── scripts.js
+│   └── styles.css
 └── riskimatriisi/
     ├── index.html
     └── esimerkki.csv

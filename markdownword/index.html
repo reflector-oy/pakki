@@ -250,7 +250,10 @@ body.has-document .preview-card { display: block; }
       <strong>Miten muunnos toimii</strong>
       <ul>
         <li>Word sivuttaa dokumentin automaattisesti sisällön, paperikoon ja marginaalien mukaan.</li>
-        <li>Markdown-otsikot <code>#</code>, <code>##</code> ja <code>###</code> muuttuvat Word-otsikoiksi.</li>
+        <li><code>#</code> on dokumentin nimi ja päätason title. Käytä sitä vain kerran.</li>
+        <li><code>##</code> vastaa Wordin Heading 1 -tasoa ja saa numeron <code>1</code>, <code>2</code> jne.</li>
+        <li><code>###</code> vastaa Heading 2 -tasoa ja saa numeron <code>1.1</code>, <code>1.2</code> jne.</li>
+        <li><code>####</code> vastaa Heading 3 -tasoa ja saa numeron <code>1.1.1</code> jne.</li>
         <li>Listat, taulukot, lainaukset, linkit ja koodilohkot säilytetään perusmuotoiltuina.</li>
         <li>Markdown-vaakaviiva <code>---</code> muuttuu vaakaviivaksi, ei pakotetuksi sivunvaihdoksi.</li>
       </ul>
@@ -489,9 +492,11 @@ body.has-document .preview-card { display: block; }
     wrapper.innerHTML = html;
     Array.prototype.forEach.call(wrapper.querySelectorAll("h1,h2,h3,h4,h5,h6"), function (heading) {
       var level = Number(heading.tagName.substring(1));
-      counters[level - 1] += 1;
-      for (var i = level; i < counters.length; i += 1) counters[i] = 0;
-      var parts = counters.slice(0, level).filter(function (value) { return value > 0; });
+      if (level === 1) return;
+      var mappedLevel = level - 2;
+      counters[mappedLevel] += 1;
+      for (var i = mappedLevel + 1; i < counters.length; i += 1) counters[i] = 0;
+      var parts = counters.slice(0, mappedLevel + 1).filter(function (value) { return value > 0; });
       if (!parts.length) return;
       if (/^\\d+(\\.\\d+)*\\s+/.test(heading.textContent || "")) return;
       heading.textContent = parts.join(".") + " " + heading.textContent;

@@ -246,10 +246,12 @@ body.has-document .preview-card { display: block; }
     <div class="format-help">
       <strong>Miten dioitus toimii</strong>
       <ul>
-        <li>Otsikot <code>#</code> ja <code>##</code> aloittavat uuden dian.</li>
-        <li>Markdown-vaakaviiva <code>---</code> aloittaa myös uuden dian.</li>
-        <li>Jos yhdelle dialle tulee liikaa sisältöä, työkalu jatkaa automaattisesti seuraavalle dialle.</li>
-        <li>Listat, taulukot, lainaukset ja koodilohkot muunnetaan yksinkertaisiksi PowerPoint-elementeiksi.</li>
+        <li><code>#</code> on dokumentin nimi ja siitä tehdään kansisivu.</li>
+        <li><code>##</code> aloittaa uuden sisältödian.</li>
+        <li><code>###</code> on dian alaotsikko, kun se on heti <code>##</code>-otsikon jälkeen.</li>
+        <li>Bulletit, taulukot, lainaukset ja koodilohkot tulevat dian sisällöksi.</li>
+        <li>Markdown-vaakaviiva <code>---</code> katkaisee nykyisen dian.</li>
+        <li>Vältä useita <code>#</code>-otsikoita samassa tiedostossa, jotta rakenne pysyy siistinä.</li>
       </ul>
     </div>
     <p class="local-note">Toimii omalla koneellasi. Markdown-tiedostoa ei lähetetä palvelimelle, pilveen tai minnekään muualle.</p>

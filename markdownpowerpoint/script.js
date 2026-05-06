@@ -122,32 +122,56 @@
   function markdownToSlides(markdown, fallbackTitle) {
     var tokens = window.marked.lexer(markdown || "", { gfm: true, breaks: false });
     var slides = [];
-    var current = { title: fallbackTitle || currentFilename, blocks: [] };
-    var hasHeading = false;
+    var documentTitle = fallbackTitle || currentFilename;
+    var current = null;
+    var hasTitleSlide = false;
 
     tokens.forEach(function (token) {
       if (token.type === "space") return;
-      if (token.type === "heading" && token.depth <= 2) {
-        if (current.blocks.length || hasHeading) slides.push(current);
+
+      if (token.type === "heading" && token.depth === 1) {
+        documentTitle = getInlineText(token.tokens, token.text) || documentTitle;
+        if (!hasTitleSlide) {
+          slides.push({ title: documentTitle, subtitle: "", blocks: [], isTitle: true });
+          hasTitleSlide = true;
+        }
+        return;
+      }
+
+      if (token.type === "heading" && token.depth === 2) {
+        if (current && (current.blocks.length || current.subtitle)) slides.push(current);
         current = {
-          title: getInlineText(token.tokens, token.text) || fallbackTitle || currentFilename,
+          title: getInlineText(token.tokens, token.text) || documentTitle,
+          subtitle: "",
           blocks: []
         };
-        hasHeading = true;
         return;
       }
+
+      if (token.type === "heading" && token.depth === 3) {
+        if (!current) current = { title: documentTitle, subtitle: "", blocks: [] };
+        if (!current.subtitle && !current.blocks.length) {
+          current.subtitle = getInlineText(token.tokens, token.text);
+        } else {
+          current.blocks.push(token);
+        }
+        return;
+      }
+
       if (token.type === "hr") {
-        if (current.blocks.length || hasHeading) slides.push(current);
-        current = { title: fallbackTitle || currentFilename, blocks: [] };
-        hasHeading = false;
+        if (current && (current.blocks.length || current.subtitle)) slides.push(current);
+        current = null;
         return;
       }
+
+      if (!current) current = { title: documentTitle, subtitle: "", blocks: [] };
       current.blocks.push(token);
     });
 
-    if (current.blocks.length || !slides.length || hasHeading) slides.push(current);
+    if (current && (current.blocks.length || current.subtitle)) slides.push(current);
+    if (!slides.length) slides.push({ title: documentTitle, subtitle: "", blocks: [], isTitle: true });
     return slides.filter(function (slide) {
-      return slide.title || slide.blocks.length;
+      return slide.title || slide.subtitle || slide.blocks.length;
     });
   }
 
@@ -268,8 +292,15 @@
   function addContentSlides(slides, model, pageCounter) {
     var title = model.title || currentFilename;
     var slide = new Slide();
-    var y = deckLayout.content.y;
+    var y = model.subtitle ? deckLayout.content.y + 0.42 : deckLayout.content.y;
     addChrome(slide, title, pageCounter.value++);
+    if (model.subtitle) {
+      slide.text(deckLayout.content.x, 1.22, deckLayout.content.w, 0.36, model.subtitle, {
+        fontFace: "Montserrat",
+        fontSize: 14,
+        color: deckStyle.accent
+      });
+    }
     slides.push(slide);
 
     function nextSlide() {
@@ -384,7 +415,7 @@
     var slides = [];
     var pageCounter = { value: 1 };
     models.forEach(function (model, index) {
-      if (index === 0 && !model.blocks.length) addTitleSlide(slides, model.title, pageCounter.value++);
+      if (model.isTitle || (index === 0 && !model.blocks.length && !model.subtitle)) addTitleSlide(slides, model.title, pageCounter.value++);
       else addContentSlides(slides, model, pageCounter);
     });
     return slides;

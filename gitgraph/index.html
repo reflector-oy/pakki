@@ -36,18 +36,20 @@ body {
 h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; }
 
 .page {
-  max-width: 1400px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 32px 32px 64px;
 }
 
 /* ── Header ── */
 header.app-header {
+  position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 32px;
   margin-bottom: 24px;
+  padding-top: 34px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--line);
 }
@@ -69,13 +71,17 @@ header.app-header {
 }
 
 .reflector-brand {
-  font-family: 'Bricolage Grotesque', sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  letter-spacing: 0.02em;
-  color: var(--accent);
-  border-left: 1px solid var(--line);
-  padding-left: 14px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+}
+
+.reflector-brand img {
+  display: block;
+  width: 118px;
+  height: auto;
 }
 
 .actions {
@@ -284,7 +290,7 @@ button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 @media print {
   body { background: white; }
   .page { padding: 0; max-width: none; }
-  .actions, .dropzone, .source-section { display: none !important; }
+  .actions, .reflector-brand, .dropzone, .source-section { display: none !important; }
   .chart-card { box-shadow: none; border-color: #ccc; }
 }
 </style>
@@ -297,13 +303,13 @@ button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
       <h1>GitGraph-muunnin</h1>
       <div class="subtitle">Release management — CSV → GitGraph</div>
     </div>
+    <div class="reflector-brand"><img src="../assets/reflector-logo-orange.svg" alt="Reflector"></div>
     <div class="actions">
       <button class="btn" onclick="location.href='../index.html'">← Pakki</button>
       <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
       <button class="btn" id="printBtn" disabled>Tulosta</button>
       <button class="btn" id="svgBtn" disabled>Lataa SVG</button>
       <button class="btn primary" id="pngBtn" disabled>Lataa PNG</button>
-      <div class="reflector-brand">Reflector</div>
     </div>
   </header>
 

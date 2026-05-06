@@ -39,17 +39,19 @@ h3 {
 }
 
 .page {
-  max-width: 1600px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 32px 32px 64px;
 }
 
 .app-header {
+  position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 32px;
   margin-bottom: 24px;
+  padding-top: 34px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
 }
@@ -154,17 +156,19 @@ h3 {
 }
 
 .reflector-brand {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
-  border-left: 1px solid var(--border);
-  color: var(--accent);
-  font-family: "Bricolage Grotesque", sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  letter-spacing: 0.02em;
-  padding-left: 14px;
   user-select: none;
   white-space: nowrap;
+}
+
+.reflector-brand img {
+  display: block;
+  width: 118px;
+  height: auto;
 }
 
 #file-picker {
@@ -568,8 +572,7 @@ body.numbering-disabled .markdown-body h6::before {
   }
 
   .reflector-brand {
-    border-left: 0;
-    padding-left: 0;
+    right: 0;
   }
 
   .drop-hint {

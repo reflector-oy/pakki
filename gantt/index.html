@@ -45,18 +45,20 @@
  }
  
  .page {
- max-width: 1600px;
+ max-width: 1040px;
  margin: 0 auto;
  padding: 32px 32px 64px;
  }
  
  /* Header */
  header.app-header {
+ position: relative;
  display: flex;
  align-items: flex-end;
  justify-content: space-between;
  gap: 32px;
  margin-bottom: 24px;
+ padding-top: 34px;
  padding-bottom: 20px;
  border-bottom: 1px solid var(--line);
  }
@@ -245,17 +247,18 @@
  .col-guide .col-values { color: var(--muted); }
  
  .reflector-brand {
+ position: absolute;
+ top: 0;
+ right: 0;
  display: flex;
  align-items: center;
- font-family: 'Bricolage Grotesque', sans-serif;
- padding-left: 14px;
- border-left: 1px solid var(--line);
- color: var(--accent);
- font-weight: 300;
- font-size: 13px;
- letter-spacing: 0.02em;
  white-space: nowrap;
  user-select: none;
+ }
+ .reflector-brand img {
+ display: block;
+ width: 118px;
+ height: auto;
  }
  .hidden { display: none !important; }
  
@@ -350,7 +353,7 @@
  @media print {
  body { background: white; }
  .page { padding: 0; max-width: none; }
- .actions, .dropzone { display: none !important; }
+ .actions, .reflector-brand, .dropzone { display: none !important; }
  .chart-card { box-shadow: none; border-color: #ccc; }
  @page { size: A3 landscape; margin: 12mm; }
  }
@@ -363,13 +366,13 @@
  <h1 id="projectTitle" contenteditable="true" spellcheck="false">Projektin aikataulu</h1>
  <div class="subtitle" id="projectSubtitle">Projektin aikataulukatsaus</div>
  </div>
+ <div class="reflector-brand"><img src="../assets/reflector-logo-orange.svg" alt="Reflector"></div>
  <div class="actions">
  <button class="btn" onclick="location.href='../index.html'">← Pakki</button>
  <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
  <button class="btn" id="printBtn" disabled>Tulosta</button>
  <button class="btn" id="svgBtn" disabled>Lataa SVG</button>
  <button class="btn primary" id="pngBtn" disabled>Lataa PNG</button>
- <div class="reflector-brand">Reflector</div>
  </div>
  </header>
  

@@ -53,12 +53,15 @@ header {
 }
 
 .logo {
-  font-family: 'Bricolage Grotesque', sans-serif;
-  font-size: 26px;
-  font-weight: 300;
-  color: var(--orange);
-  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
+}
+
+.logo img {
+  display: block;
+  width: 170px;
+  height: auto;
 }
 
 nav a {
@@ -264,11 +267,15 @@ footer {
 }
 
 .footer-logo {
-  font-family: 'Bricolage Grotesque', sans-serif;
-  font-size: 18px;
-  font-weight: 300;
-  color: var(--orange);
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
+}
+
+.footer-logo img {
+  display: block;
+  width: 118px;
+  height: auto;
 }
 
 .footer-note {
@@ -301,7 +308,9 @@ footer {
 <div class="page">
 
   <header>
-    <a class="logo" href="/">Reflector</a>
+    <a class="logo" href="/" aria-label="Reflector">
+      <img src="assets/reflector-logo-orange.svg" alt="Reflector">
+    </a>
     <nav>
       <a href="https://www.reflector.fi" target="_blank" rel="noopener">reflector.fi</a>
     </nav>
@@ -395,7 +404,9 @@ footer {
   </section>
 
   <footer>
-    <a class="footer-logo" href="https://www.reflector.fi" target="_blank" rel="noopener">Reflector</a>
+    <a class="footer-logo" href="https://www.reflector.fi" target="_blank" rel="noopener" aria-label="Reflector">
+      <img src="assets/reflector-logo-orange.svg" alt="Reflector">
+    </a>
     <div class="footer-note">Kaikki työkalut toimivat selaimessa — ei palvelinpyyntöjä, ei tallennusta.</div>
     <div class="footer-links">
       <a href="https://www.reflector.fi" target="_blank" rel="noopener">reflector.fi</a>

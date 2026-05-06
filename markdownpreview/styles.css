@@ -239,6 +239,16 @@ body.is-dragging .drop-hint {
   text-align: center;
 }
 
+.drop-hint .dropzone-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.drop-hint .dropzone-link:hover { text-decoration: underline; }
+
 body.has-document .drop-hint {
   display: none;
 }

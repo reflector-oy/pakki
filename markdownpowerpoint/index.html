@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markdown -> PowerPoint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600;12..96,700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="../lib/marked.umd.js"></script>
+<script src="../lib/markdown.js"></script>
+<script src="../lib/jszip.min.js"></script>
+<style>
+:root {
+  --bg: #F8F3EC;
+  --card: #ffffff;
+  --ink: #53190A;
+  --ink-2: #7a3010;
+  --muted: #9a8a80;
+  --line: #e8e0d5;
+  --accent: #F25B11;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: 'Montserrat', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; }
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+header.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title-block h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.title-block .subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reflector-brand {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  border-left: 1px solid var(--line);
+  padding-left: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+button.btn {
+  font-family: 'Montserrat', inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+button.btn:hover { background: #faf7f2; border-color: #d6cfc5; color: var(--ink); }
+button.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+button.btn.primary:hover { background: #d44d0d; }
+button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.drop-hint {
+  border: 2px dashed #c9c5b9;
+  border-radius: 12px;
+  background: var(--card);
+  padding: 64px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+  color: var(--muted);
+}
+.drop-hint:hover, .drop-hint.drag-over {
+  border-color: var(--accent);
+  background: #fef5f0;
+}
+.drop-hint .drop-icon {
+  display: grid;
+  width: 56px; height: 56px;
+  margin: 0 auto 16px;
+  place-items: center;
+  border-radius: 50%;
+  background: #fde8db;
+  color: var(--accent);
+}
+.drop-hint h2 { font-size: 18px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+.drop-hint p { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
+.drop-hint p:last-of-type { margin-bottom: 0; }
+.drop-hint code { background: #f0ede8; color: var(--ink-2); font-size: 12px; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono','Fira Code',monospace; }
+.drop-hint p.local-note {
+  width: min(100%, 620px);
+  margin: 18px auto 0;
+  padding: 12px 16px;
+  border: 1px solid #f5c6a7;
+  border-radius: 8px;
+  background: #fffaf5;
+  color: var(--ink-2);
+  font-weight: 500;
+  font-size: 13px;
+}
+.drop-hint .format-help {
+  width: min(100%, 620px);
+  margin: 18px auto 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #faf7f2;
+  color: var(--ink-2);
+  text-align: left;
+  font-size: 13px;
+}
+.drop-hint .format-help strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.drop-hint .format-help ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.drop-hint .format-help li { margin: 3px 0; }
+.drop-hint .dropzone-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.drop-hint .dropzone-link:hover { text-decoration: underline; }
+
+body.has-document .drop-hint { display: none; }
+
+.preview-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 40px 48px;
+  display: none;
+}
+body.has-document .preview-card { display: block; }
+
+.markdown-body { font-size: 15px; line-height: 1.7; color: var(--ink); }
+.markdown-body h1 { font-size: 28px; font-weight: 700; margin: 0 0 20px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.markdown-body h2 { font-size: 22px; font-weight: 600; margin: 32px 0 12px; }
+.markdown-body h3 { font-size: 18px; font-weight: 600; margin: 24px 0 10px; }
+.markdown-body h4, .markdown-body h5, .markdown-body h6 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; }
+.markdown-body p { margin: 0 0 14px; }
+.markdown-body ul, .markdown-body ol { margin: 0 0 14px; padding-left: 24px; }
+.markdown-body li { margin-bottom: 4px; }
+.markdown-body code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: #f0ede8; padding: 2px 6px; border-radius: 3px; }
+.markdown-body pre { background: #f0ede8; border-radius: 6px; padding: 16px; overflow-x: auto; margin: 0 0 16px; }
+.markdown-body pre code { background: none; padding: 0; font-size: 13px; }
+.markdown-body blockquote { border-left: 3px solid var(--accent); margin: 0 0 16px; padding: 8px 0 8px 16px; color: var(--ink-2); }
+.markdown-body hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
+.markdown-body table { border-collapse: collapse; width: 100%; margin: 0 0 16px; font-size: 14px; }
+.markdown-body th { background: var(--bg); font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid var(--line); }
+.markdown-body td { padding: 7px 12px; border: 1px solid var(--line); }
+.markdown-body a { color: var(--accent); }
+.markdown-body img { max-width: 100%; }
+.markdown-body strong { font-weight: 700; }
+.markdown-body em { font-style: italic; }
+
+.footer-note {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .page { padding: 20px 16px 48px; }
+  .preview-card { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="app-header">
+    <div class="title-block">
+      <h1>Markdown -> PowerPoint</h1>
+      <div class="subtitle">Markdown-muunnin - MD -> PPTX</div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="location.href='../index.html'">&larr; Pakki</button>
+      <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
+      <button class="btn primary" id="pptBtn" disabled>Lataa PowerPoint</button>
+      <div class="reflector-brand">Reflector</div>
+    </div>
+  </header>
+
+  <div class="drop-hint" id="dropHint">
+    <div class="drop-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+    </div>
+    <h2>Pudota Markdown-tiedosto tähän</h2>
+    <p>tai <strong>klikkaa valitaksesi tiedoston</strong></p>
+    <p>Tuetut tiedostot: <code>.md</code>, <code>.markdown</code> ja tekstitiedostot</p>
+    <div class="format-help">
+      <strong>Miten dioitus toimii</strong>
+      <ul>
+        <li>Otsikot <code>#</code> ja <code>##</code> aloittavat uuden dian.</li>
+        <li>Markdown-vaakaviiva <code>---</code> aloittaa myös uuden dian.</li>
+        <li>Jos yhdelle dialle tulee liikaa sisältöä, työkalu jatkaa automaattisesti seuraavalle dialle.</li>
+        <li>Listat, taulukot, lainaukset ja koodilohkot muunnetaan yksinkertaisiksi PowerPoint-elementeiksi.</li>
+      </ul>
+    </div>
+    <p class="local-note">Toimii omalla koneellasi. Markdown-tiedostoa ei lähetetä palvelimelle, pilveen tai minnekään muualle.</p>
+    <a href="esimerkki.md" download onclick="event.stopPropagation()" class="dropzone-link">Lataa esimerkkitiedosto</a>
+    <input type="file" id="filePicker" accept=".md,.markdown,.mdown,.mkd,text/markdown,text/plain" style="display:none">
+  </div>
+
+  <div class="preview-card">
+    <div class="markdown-body" id="preview"></div>
+  </div>
+
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

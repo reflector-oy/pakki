@@ -956,7 +956,7 @@
   }
 
   function renderMarkdown(markdown) {
-    preview.innerHTML = markdownToHtml(markdown);
+    preview.innerHTML = window.PakkiMarkdown.render(markdown);
     document.body.classList.add("has-document");
     if (reloadBtn) {
       reloadBtn.disabled = false;
@@ -1024,7 +1024,12 @@
 
   if (reloadBtn) {
     reloadBtn.addEventListener("click", function () {
-      filePicker.click();
+      document.body.classList.remove("has-document");
+      preview.innerHTML = "";
+      if (fileName) fileName.textContent = "Ei tiedostoa valittuna";
+      reloadBtn.disabled = true;
+      if (printBtn) printBtn.disabled = true;
+      filePicker.value = "";
     });
   }
 

@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600;12..96,700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="../lib/marked.umd.js"></script>
+    <script src="../lib/markdown.js"></script>
     <script src="script.js" defer></script>
   </head>
   <body>
@@ -44,6 +46,7 @@
         <p class="local-note">
           Toimii kokonaan omalla koneellasi. Tiedostojasi ei l&auml;hetet&auml; palvelimelle, pilveen tai minnek&auml;&auml;n muualle.
         </p>
+        <a href="esimerkki.md" download onclick="event.stopPropagation()" class="dropzone-link">Lataa esimerkkitiedosto</a>
       </div>
 
       <main id="preview" class="markdown-body" aria-live="polite"></main>

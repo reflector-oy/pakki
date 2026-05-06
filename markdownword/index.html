@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markdown → Word</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600;12..96,700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="../lib/marked.umd.js"></script>
+<script src="../lib/html-docx.js"></script>
+<script src="../lib/markdown.js"></script>
+<script src="../lib/jszip.min.js"></script>
+<style>
+:root {
+  --bg: #F8F3EC;
+  --card: #ffffff;
+  --ink: #53190A;
+  --ink-2: #7a3010;
+  --muted: #9a8a80;
+  --line: #e8e0d5;
+  --accent: #F25B11;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: 'Montserrat', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; }
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+header.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title-block h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.title-block .subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reflector-brand {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  border-left: 1px solid var(--line);
+  padding-left: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+button.btn {
+  font-family: 'Montserrat', inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+button.btn:hover { background: #faf7f2; border-color: #d6cfc5; color: var(--ink); }
+button.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+button.btn.primary:hover { background: #d44d0d; }
+button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Drop zone ── */
+.drop-hint {
+  border: 2px dashed #c9c5b9;
+  border-radius: 12px;
+  background: var(--card);
+  padding: 64px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+  color: var(--muted);
+}
+.drop-hint:hover, .drop-hint.drag-over {
+  border-color: var(--accent);
+  background: #fef5f0;
+}
+.drop-hint .drop-icon {
+  display: grid;
+  width: 56px; height: 56px;
+  margin: 0 auto 16px;
+  place-items: center;
+  border-radius: 50%;
+  background: #fde8db;
+  color: var(--accent);
+}
+.drop-hint h2 { font-size: 18px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+.drop-hint p { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
+.drop-hint p:last-of-type { margin-bottom: 0; }
+.drop-hint code { background: #f0ede8; color: var(--ink-2); font-size: 12px; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono','Fira Code',monospace; }
+.drop-hint p.local-note {
+  width: min(100%, 620px);
+  margin: 18px auto 0;
+  padding: 12px 16px;
+  border: 1px solid #f5c6a7;
+  border-radius: 8px;
+  background: #fffaf5;
+  color: var(--ink-2);
+  font-weight: 500;
+  font-size: 13px;
+}
+.drop-hint .format-help {
+  width: min(100%, 620px);
+  margin: 18px auto 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #faf7f2;
+  color: var(--ink-2);
+  text-align: left;
+  font-size: 13px;
+}
+.drop-hint .format-help strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.drop-hint .format-help ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.drop-hint .format-help li { margin: 3px 0; }
+.drop-hint .dropzone-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.drop-hint .dropzone-link:hover { text-decoration: underline; }
+
+body.has-document .drop-hint { display: none; }
+
+/* ── Preview ── */
+.preview-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 40px 48px;
+  display: none;
+}
+body.has-document .preview-card { display: block; }
+
+.markdown-body { font-size: 15px; line-height: 1.7; color: var(--ink); }
+.markdown-body h1 { font-size: 28px; font-weight: 700; margin: 0 0 20px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.markdown-body h2 { font-size: 22px; font-weight: 600; margin: 32px 0 12px; }
+.markdown-body h3 { font-size: 18px; font-weight: 600; margin: 24px 0 10px; }
+.markdown-body h4, .markdown-body h5, .markdown-body h6 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; }
+.markdown-body p { margin: 0 0 14px; }
+.markdown-body ul, .markdown-body ol { margin: 0 0 14px; padding-left: 24px; }
+.markdown-body li { margin-bottom: 4px; }
+.markdown-body code { font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; background: #f0ede8; padding: 2px 6px; border-radius: 3px; }
+.markdown-body pre { background: #f0ede8; border-radius: 6px; padding: 16px; overflow-x: auto; margin: 0 0 16px; }
+.markdown-body pre code { background: none; padding: 0; font-size: 13px; }
+.markdown-body blockquote { border-left: 3px solid var(--accent); margin: 0 0 16px; padding: 8px 0 8px 16px; color: var(--ink-2); }
+.markdown-body hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
+.markdown-body table { border-collapse: collapse; width: 100%; margin: 0 0 16px; font-size: 14px; }
+.markdown-body th { background: var(--bg); font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid var(--line); }
+.markdown-body td { padding: 7px 12px; border: 1px solid var(--line); }
+.markdown-body a { color: var(--accent); }
+.markdown-body img { max-width: 100%; }
+.markdown-body strong { font-weight: 700; }
+.markdown-body em { font-style: italic; }
+
+.footer-note {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .page { padding: 20px 16px 48px; }
+  .preview-card { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="app-header">
+    <div class="title-block">
+      <h1>Markdown → Word</h1>
+      <div class="subtitle">Markdown-muunnin — MD → DOCX</div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="location.href='../index.html'">← Pakki</button>
+      <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
+      <button class="btn primary" id="wordBtn" disabled>Lataa Word</button>
+      <div class="reflector-brand">Reflector</div>
+    </div>
+  </header>
+
+  <div class="drop-hint" id="dropHint">
+    <div class="drop-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+    </div>
+    <h2>Pudota Markdown-tiedosto tähän</h2>
+    <p>tai <strong>klikkaa valitaksesi tiedoston</strong></p>
+    <p>Tuetut tiedostot: <code>.md</code>, <code>.markdown</code> ja tekstitiedostot</p>
+    <div class="format-help">
+      <strong>Miten muunnos toimii</strong>
+      <ul>
+        <li>Word sivuttaa dokumentin automaattisesti sisällön, paperikoon ja marginaalien mukaan.</li>
+        <li>Markdown-otsikot <code>#</code>, <code>##</code> ja <code>###</code> muuttuvat Word-otsikoiksi.</li>
+        <li>Listat, taulukot, lainaukset, linkit ja koodilohkot säilytetään perusmuotoiltuina.</li>
+        <li>Markdown-vaakaviiva <code>---</code> muuttuu vaakaviivaksi, ei pakotetuksi sivunvaihdoksi.</li>
+      </ul>
+    </div>
+    <p class="local-note">Toimii kokonaan omalla koneellasi. Tiedostojasi ei lähetetä palvelimelle, pilveen tai minnekään muualle.</p>
+    <a href="esimerkki.md" download onclick="event.stopPropagation()" class="dropzone-link">Lataa esimerkkitiedosto</a>
+    <input type="file" id="filePicker" accept=".md,.markdown,.mdown,.mkd,text/markdown,text/plain" style="display:none">
+  </div>
+
+  <div class="preview-card">
+    <div class="markdown-body" id="preview"></div>
+  </div>
+
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var currentFilename = "dokumentti";
+  var logoSvgPromise = null;
+  var dropHint = document.getElementById("dropHint");
+  var filePicker = document.getElementById("filePicker");
+  var preview = document.getElementById("preview");
+  var reloadBtn = document.getElementById("reloadBtn");
+  var wordBtn = document.getElementById("wordBtn");
+  var footerNote = document.getElementById("footerNote");
+
+  function setDocumentLoaded(fileName, html) {
+    preview.innerHTML = html;
+    document.body.classList.add("has-document");
+    reloadBtn.disabled = false;
+    wordBtn.disabled = false;
+    footerNote.textContent = fileName;
+  }
+
+  function setError(fileName, message) {
+    preview.innerHTML = "<p>" + message + "</p>";
+    document.body.classList.add("has-document");
+    reloadBtn.disabled = false;
+    wordBtn.disabled = true;
+    footerNote.textContent = fileName;
+  }
+
+  function loadFile(file) {
+    currentFilename = file.name.replace(/\.[^.]+$/, "") || "dokumentti";
+
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        setDocumentLoaded(file.name, window.PakkiMarkdown.render(reader.result));
+      } catch (error) {
+        setError(file.name, "Markdown-tiedostoa ei voitu muuntaa Word-dokumentiksi.");
+        console.error(error);
+      }
+    };
+    reader.onerror = function () {
+      setError(file.name, "Tiedostoa ei voitu lukea.");
+    };
+    reader.readAsText(file, "UTF-8");
+  }
+
+  function pickFile(files) {
+    if (files && files[0]) {
+      loadFile(files[0]);
+    }
+  }
+
+  function escapeXml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
+  function relationshipXml(items) {
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      items.map(function (item) {
+        return '<Relationship Id="' + escapeXml(item.id) + '" Type="' + escapeXml(item.type) + '" Target="' + escapeXml(item.target) + '"/>';
+      }).join("") + '</Relationships>';
+  }
+
+  function parseRelationships(xmlText) {
+    var doc = new DOMParser().parseFromString(xmlText, "application/xml");
+    return Array.prototype.map.call(doc.getElementsByTagName("Relationship"), function (node) {
+      return {
+        id: node.getAttribute("Id"),
+        type: node.getAttribute("Type"),
+        target: node.getAttribute("Target")
+      };
+    });
+  }
+
+  function addContentTypeOverride(contentTypesXml, partName, contentType) {
+    if (contentTypesXml.indexOf('PartName="' + partName + '"') !== -1) return contentTypesXml;
+    return contentTypesXml.replace("</Types>", '<Override PartName="' + partName + '" ContentType="' + contentType + '"/></Types>');
+  }
+
+  function addDefaultContentType(contentTypesXml, extension, contentType) {
+    if (contentTypesXml.indexOf('Extension="' + extension + '"') !== -1) return contentTypesXml;
+    return contentTypesXml.replace("</Types>", '<Default Extension="' + extension + '" ContentType="' + contentType + '"/></Types>');
+  }
+
+  function getLogoSvg() {
+    if (logoSvgPromise) return logoSvgPromise;
+    if (window.ReflectorLogoSvg) {
+      logoSvgPromise = Promise.resolve(window.ReflectorLogoSvg);
+    } else if (window.fetch) {
+      logoSvgPromise = fetch("../assets/reflector-logo-orange.svg").then(function (response) {
+        if (!response.ok) throw new Error("Logoa ei voitu ladata.");
+        return response.text();
+      });
+    } else {
+      logoSvgPromise = Promise.resolve("");
+    }
+    return logoSvgPromise;
+  }
+
+  function wordText(text, opts) {
+    opts = opts || {};
+    var props = '<w:rFonts w:ascii="' + escapeXml(opts.font || "Montserrat") + '" w:hAnsi="' + escapeXml(opts.font || "Montserrat") + '"/>' +
+      '<w:color w:val="' + escapeXml(opts.color || "551500") + '"/>' +
+      '<w:sz w:val="' + escapeXml(String(Math.round((opts.size || 9) * 2))) + '"/>';
+    if (opts.bold) props += "<w:b/>";
+    return '<w:r><w:rPr>' + props + '</w:rPr><w:t xml:space="preserve">' + escapeXml(text) + '</w:t></w:r>';
+  }
+
+  function wordField(instr, opts) {
+    opts = opts || {};
+    return '<w:fldSimple w:instr="' + escapeXml(instr) + '"><w:r><w:rPr><w:rFonts w:ascii="' +
+      escapeXml(opts.font || "Montserrat") + '" w:hAnsi="' + escapeXml(opts.font || "Montserrat") +
+      '"/><w:color w:val="' + escapeXml(opts.color || "551500") + '"/><w:sz w:val="' +
+      escapeXml(String(Math.round((opts.size || 9) * 2))) + '"/></w:rPr><w:t>1</w:t></w:r></w:fldSimple>';
+  }
+
+  function logoDrawingXml() {
+    return '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">' +
+      '<wp:extent cx="1554480" cy="228600"/><wp:effectExtent l="0" t="0" r="0" b="0"/>' +
+      '<wp:docPr id="1" name="Reflector logo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr>' +
+      '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+      '<pic:pic><pic:nvPicPr><pic:cNvPr id="1" name="reflector-logo-orange.svg"/><pic:cNvPicPr/></pic:nvPicPr>' +
+      '<pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' +
+      '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1554480" cy="228600"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>' +
+      '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
+  }
+
+  function headerXml(title) {
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+      '<w:p><w:pPr><w:pStyle w:val="Header"/><w:tabs><w:tab w:val="right" w:pos="9360"/></w:tabs><w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="F25B11"/></w:pBdr></w:pPr>' +
+      logoDrawingXml() +
+      '<w:r><w:tab/></w:r>' +
+      wordText(title, { font: "Montserrat", color: "969696", size: 8 }) +
+      '</w:p></w:hdr>';
+  }
+
+  function footerXml() {
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+      '<w:p><w:pPr><w:pStyle w:val="Footer"/><w:tabs><w:tab w:val="right" w:pos="9360"/></w:tabs></w:pPr>' +
+      wordText("Reflector Oy © 2026", { font: "Montserrat", color: "F25B11", size: 8 }) +
+      '<w:r><w:tab/></w:r>' +
+      wordField(" PAGE ", { size: 8 }) +
+      wordText("(", { size: 8 }) +
+      wordField(" NUMPAGES ", { size: 8 }) +
+      wordText(")", { size: 8 }) +
+      '</w:p></w:ftr>';
+  }
+
+  function patchDocxChrome(blob, title) {
+    return Promise.all([blob.arrayBuffer(), getLogoSvg()])
+      .then(function (items) {
+        return window.JSZip.loadAsync(items[0]).then(function (zip) {
+          return { zip: zip, logoSvg: items[1] };
+        });
+      })
+      .then(function (context) {
+        var zip = context.zip;
+        return Promise.all([
+          zip.file("word/document.xml").async("string"),
+          zip.file("word/_rels/document.xml.rels").async("string"),
+          zip.file("[Content_Types].xml").async("string")
+        ]).then(function (parts) {
+          var documentXml = parts[0];
+          var rels = parseRelationships(parts[1]);
+          var contentTypesXml = parts[2];
+
+          rels = rels.filter(function (rel) {
+            return rel.target !== "header1.xml" && rel.target !== "footer1.xml";
+          });
+          rels.push({
+            id: "rIdPakkiHeader",
+            type: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header",
+            target: "header1.xml"
+          });
+          rels.push({
+            id: "rIdPakkiFooter",
+            type: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer",
+            target: "footer1.xml"
+          });
+
+          documentXml = documentXml.replace(/<w:headerReference[^>]*\/>/g, "").replace(/<w:footerReference[^>]*\/>/g, "");
+          documentXml = documentXml.replace("<w:sectPr>", '<w:sectPr><w:headerReference w:type="default" r:id="rIdPakkiHeader"/><w:footerReference w:type="default" r:id="rIdPakkiFooter"/>');
+
+          contentTypesXml = addContentTypeOverride(contentTypesXml, "/word/header1.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml");
+          contentTypesXml = addContentTypeOverride(contentTypesXml, "/word/footer1.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml");
+          contentTypesXml = addDefaultContentType(contentTypesXml, "svg", "image/svg+xml");
+
+          zip.file("word/document.xml", documentXml);
+          zip.file("word/_rels/document.xml.rels", relationshipXml(rels));
+          zip.file("[Content_Types].xml", contentTypesXml);
+          zip.file("word/header1.xml", headerXml(title));
+          zip.file("word/_rels/header1.xml.rels", relationshipXml([{
+            id: "rIdLogo",
+            type: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+            target: "media/reflector-logo-orange.svg"
+          }]));
+          zip.file("word/footer1.xml", footerXml());
+          zip.file("word/media/reflector-logo-orange.svg", context.logoSvg);
+
+          return zip.generateAsync({
+            type: "blob",
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          });
+        });
+      });
+  }
+
+  function numberHeadings(html) {
+    var wrapper = document.createElement("div");
+    var counters = [0, 0, 0, 0, 0, 0];
+    wrapper.innerHTML = html;
+    Array.prototype.forEach.call(wrapper.querySelectorAll("h1,h2,h3,h4,h5,h6"), function (heading) {
+      var level = Number(heading.tagName.substring(1));
+      counters[level - 1] += 1;
+      for (var i = level; i < counters.length; i += 1) counters[i] = 0;
+      var parts = counters.slice(0, level).filter(function (value) { return value > 0; });
+      if (!parts.length) return;
+      if (/^\\d+(\\.\\d+)*\\s+/.test(heading.textContent || "")) return;
+      heading.textContent = parts.join(".") + " " + heading.textContent;
+    });
+    return wrapper.innerHTML;
+  }
+
+  dropHint.addEventListener("click", function () {
+    filePicker.click();
+  });
+
+  filePicker.addEventListener("change", function () {
+    pickFile(filePicker.files);
+    filePicker.value = "";
+  });
+
+  dropHint.addEventListener("dragover", function (event) {
+    event.preventDefault();
+    dropHint.classList.add("drag-over");
+  });
+
+  dropHint.addEventListener("dragleave", function () {
+    dropHint.classList.remove("drag-over");
+  });
+
+  dropHint.addEventListener("drop", function (event) {
+    event.preventDefault();
+    dropHint.classList.remove("drag-over");
+    pickFile(event.dataTransfer.files);
+  });
+
+  reloadBtn.addEventListener("click", function () {
+    document.body.classList.remove("has-document");
+    preview.innerHTML = "";
+    footerNote.textContent = "";
+    reloadBtn.disabled = true;
+    wordBtn.disabled = true;
+    filePicker.value = "";
+  });
+
+  wordBtn.addEventListener("click", function () {
+    var fullHtml = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" +
+      "body{font-family:Montserrat,Calibri,Arial,sans-serif;font-size:10.5pt;line-height:1.5;color:#551500;margin:0;padding:0}" +
+      "h1,h2,h3{font-family:'Bricolage Grotesque',Montserrat,Calibri,Arial,sans-serif;color:#551500}" +
+      "h1{font-size:20pt;font-weight:bold;margin:0 0 12pt;border-bottom:1.5pt solid #F25B11;padding-bottom:4pt}" +
+      "h2{font-size:15pt;font-weight:bold;margin:16pt 0 8pt;color:#F25B11}" +
+      "h3{font-size:12.5pt;font-weight:bold;margin:12pt 0 6pt}" +
+      "h4,h5,h6{font-size:11pt;font-weight:bold;margin:10pt 0 4pt;color:#551500}" +
+      "p{margin:0 0 8pt}" +
+      "ul,ol{margin:0 0 8pt;padding-left:20pt}" +
+      "li{margin-bottom:3pt}" +
+      "code{font-family:'Courier New',monospace;font-size:9.5pt;background:#F0EDE8;color:#551500}" +
+      "pre{font-family:'Courier New',monospace;font-size:9.5pt;background:#F0EDE8;padding:8pt;margin:0 0 8pt;white-space:pre-wrap}" +
+      "blockquote{border-left:3pt solid #F25B11;margin:0 0 8pt;padding:4pt 0 4pt 12pt;color:#551500;background:#F8F3EC}" +
+      "hr{border:none;border-top:1pt solid #F25B11;margin:12pt 0}" +
+      "table{border-collapse:collapse;width:100%;margin:0 0 8pt}" +
+      "th{background:#FFA349;color:#fff;font-weight:bold;text-align:left;padding:5pt 8pt;border:1pt solid #fff}" +
+      "td{background:#FBE0CF;padding:4pt 8pt;border:1pt solid #fff}" +
+      "tr:nth-child(even) td{background:#FDF0E8}" +
+      "a{color:#F25B11}" +
+      "strong{font-weight:bold}em{font-style:italic}" +
+      "</style></head><body>" + numberHeadings(preview.innerHTML) + "</body></html>";
+
+    wordBtn.disabled = true;
+    wordBtn.textContent = "Luodaan...";
+
+    patchDocxChrome(window.htmlDocx.asBlob(fullHtml, {
+      margins: {
+        top: 1260,
+        right: 1260,
+        bottom: 1260,
+        left: 1260,
+        header: 720,
+        footer: 720,
+        gutter: 0
+      }
+    }), currentFilename)
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+
+        link.href = url;
+        link.download = currentFilename + ".docx";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(function () {
+          URL.revokeObjectURL(url);
+        }, 1000);
+      })
+      .catch(function (error) {
+        console.error(error);
+        alert("Word-dokumentin luonti epäonnistui.");
+      })
+      .finally(function () {
+        wordBtn.disabled = false;
+        wordBtn.textContent = "Lataa Word";
+      });
+  });
+}());
+</script>
+</body>
+</html>

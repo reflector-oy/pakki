@@ -2,8 +2,6 @@
   "use strict";
 
   var EMU = 914400;
-  var SLIDE_W = 13.333;
-  var SLIDE_H = 7.5;
   var SLIDE_CX = 12192000;
   var SLIDE_CY = 6858000;
 
@@ -16,6 +14,7 @@
   var reloadBtn = document.getElementById("reloadBtn");
   var pptBtn = document.getElementById("pptBtn");
   var footerNote = document.getElementById("footerNote");
+  var brandToggle = document.getElementById("brandToggle");
 
   // Static values copied from WIP/Reflector_ppt_pohja_2025.potx.
   var deckStyle = {
@@ -33,6 +32,27 @@
     tableFillAlt: "FDF0E8",
     code: "F0EDE8"
   };
+
+  var plainStyle = {
+    bg: "FFFFFF",
+    titleBg: "FFFFFF",
+    card: "FFFFFF",
+    ink: "1A1A1A",
+    ink2: "1A1A1A",
+    muted: "666666",
+    line: "CCCCCC",
+    accent: "1A1A1A",
+    accent2: "CCCCCC",
+    accent3: "DDDDDD",
+    tableFill: "E0E0E0",
+    tableFillAlt: "F0F0F0",
+    code: "F0F0F0"
+  };
+
+  var activeStyle = deckStyle;
+  var activeFontHeading = "Bricolage Grotesque";
+  var activeFontBody = "Montserrat";
+  var activeBrand = true;
 
   var deckLayout = {
     brand: { x: 0.9, y: 0.58, w: 5.2, h: 0.62 },
@@ -186,8 +206,8 @@
     var paragraphs = String(text || "").split(/\n/);
     return paragraphs.map(function (line) {
       return '<a:p><a:pPr algn="' + xml(opts.align || "l") + '"/><a:r><a:rPr lang="fi-FI" sz="' + size(opts.fontSize || 12) + '"' +
-        (opts.bold ? ' b="1"' : "") + (opts.italic ? ' i="1"' : "") + '><a:solidFill><a:srgbClr val="' + xml(opts.color || deckStyle.ink) +
-        '"/></a:solidFill><a:latin typeface="' + xml(opts.fontFace || "Montserrat") + '"/><a:cs typeface="' + xml(opts.fontFace || "Montserrat") +
+        (opts.bold ? ' b="1"' : "") + (opts.italic ? ' i="1"' : "") + '><a:solidFill><a:srgbClr val="' + xml(opts.color || activeStyle.ink) +
+        '"/></a:solidFill><a:latin typeface="' + xml(opts.fontFace || activeFontBody) + '"/><a:cs typeface="' + xml(opts.fontFace || activeFontBody) +
         '"/></a:rPr><a:t>' + xml(line) + '</a:t></a:r></a:p>';
     }).join("");
   }
@@ -196,7 +216,7 @@
     this.id = 2;
     this.objects = [];
     this.rels = [];
-    this.background = deckStyle.bg;
+    this.background = activeStyle.bg;
   }
 
   function textAnchor(value) {
@@ -212,8 +232,8 @@
     this.objects.push('<p:sp><p:nvSpPr><p:cNvPr id="' + id + '" name="Shape ' + id +
       '"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="' + emu(x) + '" y="' + emu(y) +
       '"/><a:ext cx="' + emu(w) + '" cy="' + emu(h) + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom>' +
-      '<a:solidFill><a:srgbClr val="' + xml(fill || deckStyle.card) + '"/></a:solidFill><a:ln w="6350"><a:solidFill><a:srgbClr val="' +
-      xml(line || fill || deckStyle.line) + '"/></a:solidFill></a:ln></p:spPr></p:sp>');
+      '<a:solidFill><a:srgbClr val="' + xml(fill || activeStyle.card) + '"/></a:solidFill><a:ln w="6350"><a:solidFill><a:srgbClr val="' +
+      xml(line || fill || activeStyle.line) + '"/></a:solidFill></a:ln></p:spPr></p:sp>');
   };
 
   Slide.prototype.text = function (x, y, w, h, text, opts) {
@@ -241,10 +261,77 @@
       emu(w) + '" cy="' + emu(h) + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>');
   };
 
+  Slide.prototype.table = function (x, y, w, rows, rowH) {
+    var id = this.nextId();
+    var cols = Math.max.apply(null, rows.map(function (r) { return r.length; }));
+    var colW = Math.round(emu(w) / Math.max(1, cols));
+    var rowHemu = emu(rowH);
+
+    var gridCols = "";
+    for (var c = 0; c < cols; c++) {
+      gridCols += '<a:gridCol w="' + colW + '"/>';
+    }
+
+    var tableRows = rows.map(function (row, rowIndex) {
+      var cells = "";
+      for (var c = 0; c < cols; c++) {
+        var cell = row[c] != null ? row[c] : "";
+        var fill, textColor, bold;
+        if (rowIndex === 0) {
+          fill = activeStyle.accent2;
+          textColor = activeBrand ? "FFFFFF" : activeStyle.ink;
+          bold = "1";
+        } else {
+          fill = rowIndex % 2 === 1 ? activeStyle.tableFill : activeStyle.tableFillAlt;
+          textColor = activeStyle.ink;
+          bold = "0";
+        }
+        cells +=
+          '<a:tc>' +
+            '<a:txBody>' +
+              '<a:bodyPr/><a:lstStyle/>' +
+              '<a:p><a:pPr algn="l"/><a:r>' +
+                '<a:rPr lang="fi-FI" sz="' + size(8.8) + '" b="' + bold + '" dirty="0">' +
+                  '<a:solidFill><a:srgbClr val="' + xml(textColor) + '"/></a:solidFill>' +
+                  '<a:latin typeface="' + xml(activeFontBody) + '"/>' +
+                  '<a:cs typeface="' + xml(activeFontBody) + '"/>' +
+                '</a:rPr>' +
+                '<a:t>' + xml(cell) + '</a:t>' +
+              '</a:r></a:p>' +
+            '</a:txBody>' +
+            '<a:tcPr marL="91440" marR="91440" marT="45720" marB="45720">' +
+              '<a:solidFill><a:srgbClr val="' + xml(fill) + '"/></a:solidFill>' +
+            '</a:tcPr>' +
+          '</a:tc>';
+      }
+      return '<a:tr h="' + rowHemu + '">' + cells + '</a:tr>';
+    }).join("");
+
+    this.objects.push(
+      '<p:graphicFrame>' +
+        '<p:nvGraphicFramePr>' +
+          '<p:cNvPr id="' + id + '" name="Table ' + id + '"/>' +
+          '<p:cNvGraphicFramePr><a:graphicFrameLocks noGrp="1"/></p:cNvGraphicFramePr>' +
+          '<p:nvPr/>' +
+        '</p:nvGraphicFramePr>' +
+        '<p:xfrm><a:off x="' + emu(x) + '" y="' + emu(y) + '"/><a:ext cx="' + emu(w) + '" cy="' + (rowHemu * rows.length) + '"/></p:xfrm>' +
+        '<a:graphic>' +
+          '<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table">' +
+            '<a:tbl>' +
+              '<a:tblPr firstRow="1" bandRow="0"/>' +
+              '<a:tblGrid>' + gridCols + '</a:tblGrid>' +
+              tableRows +
+            '</a:tbl>' +
+          '</a:graphicData>' +
+        '</a:graphic>' +
+      '</p:graphicFrame>'
+    );
+  };
+
   Slide.prototype.xml = function () {
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">' +
-      '<p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="' + xml(this.background || deckStyle.bg) + '"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>' +
+      '<p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="' + xml(this.background || activeStyle.bg) + '"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>' +
       '<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + SLIDE_CX +
       '" cy="' + SLIDE_CY + '"/><a:chOff x="0" y="0"/><a:chExt cx="' + SLIDE_CX + '" cy="' + SLIDE_CY + '"/></a:xfrm></p:grpSpPr>' +
       this.objects.join("") + '</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>';
@@ -252,39 +339,43 @@
 
   function addChrome(slide, title, pageNumber) {
     slide.text(deckLayout.contentTitle.x, deckLayout.contentTitle.y, deckLayout.contentTitle.w, deckLayout.contentTitle.h, title || currentFilename, {
-      fontFace: "Bricolage Grotesque",
+      fontFace: activeFontHeading,
       fontSize: 23,
       bold: false,
-      color: deckStyle.ink
+      color: activeStyle.ink
     });
-    slide.logo(0.92, deckLayout.footerY + 0.02, 1.18, 0.18);
-    slide.text(10.78, deckLayout.footerY + 0.02, 1.65, 0.2, "Reflector Oy © 2026", {
-      fontSize: 8,
-      color: deckStyle.accent,
-      align: "r"
-    });
-    slide.text(12.68, deckLayout.footerY + 0.02, 0.25, 0.2, String(pageNumber), {
-      fontSize: 8,
-      color: deckStyle.ink,
-      align: "r"
-    });
+    if (activeBrand) {
+      slide.logo(0.92, deckLayout.footerY + 0.02, 1.18, 0.18);
+      slide.text(10.78, deckLayout.footerY + 0.02, 1.65, 0.2, "Reflector Oy © 2026", {
+        fontSize: 8,
+        color: activeStyle.accent,
+        align: "r"
+      });
+      slide.text(12.68, deckLayout.footerY + 0.02, 0.25, 0.2, String(pageNumber), {
+        fontSize: 8,
+        color: activeStyle.ink,
+        align: "r"
+      });
+    }
   }
 
   function addTitleSlide(slides, title, pageNumber) {
     var slide = new Slide();
-    slide.background = deckStyle.titleBg;
-    slide.logo(deckLayout.brand.x, deckLayout.brand.y + 0.05, 3.25, 0.48);
+    slide.background = activeStyle.titleBg;
+    if (activeBrand) {
+      slide.logo(deckLayout.brand.x, deckLayout.brand.y + 0.05, 3.25, 0.48);
+    }
     slide.text(deckLayout.title.x, deckLayout.title.y, deckLayout.title.w, deckLayout.title.h, title || currentFilename, {
-      fontFace: "Bricolage Grotesque",
+      fontFace: activeFontHeading,
       fontSize: 31,
       bold: false,
-      color: deckStyle.ink,
+      color: activeStyle.ink,
       valign: "ctr"
     });
     slide.text(deckLayout.subtitle.x, deckLayout.subtitle.y, deckLayout.subtitle.w, deckLayout.subtitle.h, "Markdown -> PowerPoint", {
-      fontFace: "Montserrat",
+      fontFace: activeFontBody,
       fontSize: 16,
-      color: deckStyle.accent
+      color: activeStyle.accent
     });
     slides.push(slide);
   }
@@ -296,9 +387,9 @@
     addChrome(slide, title, pageCounter.value++);
     if (model.subtitle) {
       slide.text(deckLayout.content.x, 1.22, deckLayout.content.w, 0.36, model.subtitle, {
-        fontFace: "Montserrat",
+        fontFace: activeFontBody,
         fontSize: 14,
-        color: deckStyle.accent
+        color: activeStyle.accent
       });
     }
     slides.push(slide);
@@ -318,7 +409,7 @@
       if (!text) return;
       var height = estimateTextHeight(text, 92, 0.27, 0.42);
       ensureSpace(height + 0.1);
-      slide.text(deckLayout.content.x, y, deckLayout.content.w, height, text, { fontSize: 14, color: deckStyle.ink });
+      slide.text(deckLayout.content.x, y, deckLayout.content.w, height, text, { fontSize: 14, color: activeStyle.ink });
       y += height + 0.18;
     }
 
@@ -326,10 +417,10 @@
       if (!text) return;
       ensureSpace(0.55);
       slide.text(deckLayout.content.x, y, deckLayout.content.w, 0.38, text, {
-        fontFace: "Bricolage Grotesque",
+        fontFace: activeFontHeading,
         fontSize: 17,
         bold: false,
-        color: deckStyle.accent
+        color: activeStyle.accent
       });
       y += 0.52;
     }
@@ -340,7 +431,7 @@
         var prefix = token.ordered ? String(index + 1) + ". " : "- ";
         var height = estimateTextHeight(text, 86, 0.25, 0.34);
         ensureSpace(height + 0.1);
-        slide.text(deckLayout.content.x + 0.2, y, deckLayout.content.w - 0.2, height, prefix + text, { fontSize: 13, color: deckStyle.ink });
+        slide.text(deckLayout.content.x + 0.2, y, deckLayout.content.w - 0.2, height, prefix + text, { fontSize: 13, color: activeStyle.ink });
         y += height + 0.1;
       });
       y += 0.08;
@@ -351,11 +442,11 @@
       if (!text) return;
       var height = Math.min(2.6, estimateTextHeight(text, 74, 0.2, 0.58));
       ensureSpace(height + 0.2);
-      slide.rect(deckLayout.content.x, y - 0.06, deckLayout.content.w, height + 0.1, deckStyle.code, deckStyle.line);
+      slide.rect(deckLayout.content.x, y - 0.06, deckLayout.content.w, height + 0.1, activeStyle.code, activeStyle.line);
       slide.text(deckLayout.content.x + 0.16, y + 0.04, deckLayout.content.w - 0.32, height, text, {
         fontFace: "Courier New",
         fontSize: 9.5,
-        color: deckStyle.ink2
+        color: activeStyle.ink2
       });
       y += height + 0.32;
     }
@@ -365,24 +456,10 @@
       (token.rows || []).slice(0, 8).forEach(function (row) {
         rows.push(row.map(function (cell) { return getInlineText(cell.tokens, cell.text); }));
       });
-      var cols = Math.max.apply(null, rows.map(function (row) { return row.length; }));
       var rowH = 0.38;
-      var cellW = deckLayout.content.w / Math.max(1, cols);
       var height = rows.length * rowH;
       ensureSpace(height + 0.24);
-      rows.forEach(function (row, rowIndex) {
-        row.forEach(function (cell, colIndex) {
-          var x = deckLayout.content.x + colIndex * cellW;
-          var fill = rowIndex === 0 ? deckStyle.accent2 : (rowIndex % 2 ? deckStyle.tableFill : deckStyle.tableFillAlt);
-          var textColor = rowIndex === 0 ? "FFFFFF" : deckStyle.ink;
-          slide.rect(x, y + rowIndex * rowH, cellW, rowH, fill, "FFFFFF");
-          slide.text(x + 0.08, y + rowIndex * rowH + 0.08, cellW - 0.16, rowH - 0.08, cell, {
-            fontSize: 8.8,
-            bold: rowIndex === 0,
-            color: textColor
-          });
-        });
-      });
+      slide.table(deckLayout.content.x, y, deckLayout.content.w, rows, rowH);
       y += height + 0.28;
     }
 
@@ -390,11 +467,11 @@
       var text = getBlockText(token);
       var height = estimateTextHeight(text, 86, 0.25, 0.46);
       ensureSpace(height + 0.22);
-      slide.rect(deckLayout.content.x, y - 0.03, 0.06, height + 0.06, deckStyle.accent, deckStyle.accent);
+      slide.rect(deckLayout.content.x, y - 0.03, 0.06, height + 0.06, activeStyle.accent, activeStyle.accent);
       slide.text(deckLayout.content.x + 0.22, y, deckLayout.content.w - 0.35, height, text, {
         fontSize: 13,
         italic: true,
-        color: deckStyle.ink2
+        color: activeStyle.ink2
       });
       y += height + 0.26;
     }
@@ -480,12 +557,17 @@
   function createPptxBlob(markdown, options) {
     options = options || {};
     var title = options.title || currentFilename;
+    activeBrand = options.useBrand !== false;
+    activeStyle = activeBrand ? deckStyle : plainStyle;
+    activeFontHeading = activeBrand ? "Bricolage Grotesque" : "Calibri Light";
+    activeFontBody = activeBrand ? "Montserrat" : "Calibri";
+
     var slides = buildSlides(markdown, title);
     var zip = new window.JSZip();
-
     addStaticParts(zip, slides, title);
-    return getLogoSvg().then(function (logoSvg) {
-      zip.file("ppt/media/reflector-logo-orange.svg", logoSvg);
+
+    function buildZip(logoSvg) {
+      if (logoSvg) zip.file("ppt/media/reflector-logo-orange.svg", logoSvg);
       slides.forEach(function (slide, index) {
         var num = index + 1;
         zip.file("ppt/slides/slide" + num + ".xml", slide.xml());
@@ -493,12 +575,16 @@
           { id: "rId1", type: "http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout", target: "../slideLayouts/slideLayout1.xml" }
         ].concat(slide.rels)));
       });
-
       return zip.generateAsync({
         type: "blob",
         mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation"
       });
-    });
+    }
+
+    if (activeBrand) {
+      return getLogoSvg().then(buildZip);
+    }
+    return buildZip(null);
   }
 
   function downloadBlob(blob, filename) {
@@ -572,7 +658,8 @@
   pptBtn.addEventListener("click", function () {
     pptBtn.disabled = true;
     pptBtn.textContent = "Luodaan...";
-    createPptxBlob(currentMarkdown, { title: currentFilename })
+    var useBrand = !brandToggle || brandToggle.checked;
+    createPptxBlob(currentMarkdown, { title: currentFilename, useBrand: useBrand })
       .then(function (blob) {
         downloadBlob(blob, currentFilename + ".pptx");
       })

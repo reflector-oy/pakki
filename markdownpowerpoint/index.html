@@ -90,6 +90,31 @@ header.app-header {
   align-items: center;
 }
 
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 35px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+  font-family: 'Montserrat', inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 12px;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+.toggle:hover { background: #faf7f2; border-color: #d6cfc5; color: var(--ink); }
+.toggle input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 button.btn {
   font-family: 'Montserrat', inherit;
   font-size: 13px;
@@ -233,6 +258,10 @@ body.has-document .preview-card { display: block; }
     <div class="reflector-brand"><img src="../assets/reflector-logo-orange.svg" alt="Reflector"></div>
     <div class="actions">
       <button class="btn" onclick="location.href='../index.html'">&larr; Pakki</button>
+      <label class="toggle">
+        <input id="brandToggle" type="checkbox" checked>
+        <span>Reflector brändi</span>
+      </label>
       <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
       <button class="btn primary" id="pptBtn" disabled>Lataa PowerPoint</button>
     </div>

@@ -91,6 +91,31 @@ header.app-header {
   align-items: center;
 }
 
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 35px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+  font-family: 'Montserrat', inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 12px;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+.toggle:hover { background: #faf7f2; border-color: #d6cfc5; color: var(--ink); }
+.toggle input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 button.btn {
   font-family: 'Montserrat', inherit;
   font-size: 13px;
@@ -236,6 +261,10 @@ body.has-document .preview-card { display: block; }
     <div class="reflector-brand"><img src="../assets/reflector-logo-orange.svg" alt="Reflector"></div>
     <div class="actions">
       <button class="btn" onclick="location.href='../index.html'">← Pakki</button>
+      <label class="toggle">
+        <input id="brandToggle" type="checkbox" checked>
+        <span>Reflector brändi</span>
+      </label>
       <button class="btn" id="reloadBtn" disabled>Vaihda tiedosto</button>
       <button class="btn primary" id="wordBtn" disabled>Lataa Word</button>
     </div>
@@ -288,6 +317,7 @@ body.has-document .preview-card { display: block; }
   var reloadBtn = document.getElementById("reloadBtn");
   var wordBtn = document.getElementById("wordBtn");
   var footerNote = document.getElementById("footerNote");
+  var brandToggle = document.getElementById("brandToggle");
 
   function setDocumentLoaded(fileName, html) {
     preview.innerHTML = html;
@@ -544,55 +574,68 @@ body.has-document .preview-card { display: block; }
   });
 
   wordBtn.addEventListener("click", function () {
+    var useBrand = !brandToggle || brandToggle.checked;
+
+    var brandCss = useBrand
+      ? "body{font-family:Montserrat,Calibri,Arial,sans-serif;font-size:10.5pt;line-height:1.5;color:#551500;margin:0;padding:0}" +
+        "h1,h2,h3{font-family:'Bricolage Grotesque',Montserrat,Calibri,Arial,sans-serif;color:#551500}" +
+        "h1{font-size:20pt;font-weight:bold;margin:0 0 12pt;border-bottom:1.5pt solid #F25B11;padding-bottom:4pt}" +
+        "h2{font-size:15pt;font-weight:bold;margin:16pt 0 8pt;color:#F25B11}" +
+        "h3{font-size:12.5pt;font-weight:bold;margin:12pt 0 6pt}" +
+        "h4,h5,h6{font-size:11pt;font-weight:bold;margin:10pt 0 4pt;color:#551500}" +
+        "p{margin:0 0 8pt}" +
+        "ul,ol{margin:0 0 8pt;padding-left:20pt}" +
+        "li{margin-bottom:3pt}" +
+        "code{font-family:'Courier New',monospace;font-size:9.5pt;background:#F0EDE8;color:#551500}" +
+        "pre{font-family:'Courier New',monospace;font-size:9.5pt;background:#F0EDE8;padding:8pt;margin:0 0 8pt;white-space:pre-wrap}" +
+        "blockquote{border-left:3pt solid #F25B11;margin:0 0 8pt;padding:4pt 0 4pt 12pt;color:#551500;background:#F8F3EC}" +
+        "hr{border:none;border-top:1pt solid #F25B11;margin:12pt 0}" +
+        "table{border-collapse:collapse;width:100%;margin:0 0 8pt}" +
+        "th{background:#FFA349;color:#fff;font-weight:bold;text-align:left;padding:5pt 8pt;border:1pt solid #fff}" +
+        "td{background:#FBE0CF;padding:4pt 8pt;border:1pt solid #fff}" +
+        "tr:nth-child(even) td{background:#FDF0E8}" +
+        "a{color:#F25B11}" +
+        "strong{font-weight:bold}em{font-style:italic}"
+      : "body{font-family:Calibri,Arial,sans-serif;font-size:10.5pt;line-height:1.5;color:#000;margin:0;padding:0}" +
+        "h1,h2,h3,h4,h5,h6{font-family:'Calibri Light',Calibri,Arial,sans-serif;color:#000}" +
+        "h1{font-size:20pt;font-weight:bold;margin:0 0 12pt}" +
+        "h2{font-size:15pt;font-weight:bold;margin:16pt 0 8pt}" +
+        "h3{font-size:12.5pt;font-weight:bold;margin:12pt 0 6pt}" +
+        "h4,h5,h6{font-size:11pt;font-weight:bold;margin:10pt 0 4pt}" +
+        "p{margin:0 0 8pt}" +
+        "ul,ol{margin:0 0 8pt;padding-left:20pt}" +
+        "li{margin-bottom:3pt}" +
+        "code{font-family:'Courier New',monospace;font-size:9.5pt;background:#f5f5f5}" +
+        "pre{font-family:'Courier New',monospace;font-size:9.5pt;background:#f5f5f5;padding:8pt;margin:0 0 8pt;white-space:pre-wrap}" +
+        "blockquote{border-left:3pt solid #ccc;margin:0 0 8pt;padding:4pt 0 4pt 12pt}" +
+        "hr{border:none;border-top:1pt solid #ccc;margin:12pt 0}" +
+        "table{border-collapse:collapse;width:100%;margin:0 0 8pt}" +
+        "th{background:#ddd;font-weight:bold;text-align:left;padding:5pt 8pt;border:1pt solid #fff}" +
+        "td{padding:4pt 8pt;border:1pt solid #ccc}" +
+        "tr:nth-child(even) td{background:#f5f5f5}" +
+        "a{color:#000}" +
+        "strong{font-weight:bold}em{font-style:italic}";
+
     var fullHtml = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" +
-      "body{font-family:Montserrat,Calibri,Arial,sans-serif;font-size:10.5pt;line-height:1.5;color:#551500;margin:0;padding:0}" +
-      "h1,h2,h3{font-family:'Bricolage Grotesque',Montserrat,Calibri,Arial,sans-serif;color:#551500}" +
-      "h1{font-size:20pt;font-weight:bold;margin:0 0 12pt;border-bottom:1.5pt solid #F25B11;padding-bottom:4pt}" +
-      "h2{font-size:15pt;font-weight:bold;margin:16pt 0 8pt;color:#F25B11}" +
-      "h3{font-size:12.5pt;font-weight:bold;margin:12pt 0 6pt}" +
-      "h4,h5,h6{font-size:11pt;font-weight:bold;margin:10pt 0 4pt;color:#551500}" +
-      "p{margin:0 0 8pt}" +
-      "ul,ol{margin:0 0 8pt;padding-left:20pt}" +
-      "li{margin-bottom:3pt}" +
-      "code{font-family:'Courier New',monospace;font-size:9.5pt;background:#F0EDE8;color:#551500}" +
-      "pre{font-family:'Courier New',monospace;font-size:9.5pt;background:#F0EDE8;padding:8pt;margin:0 0 8pt;white-space:pre-wrap}" +
-      "blockquote{border-left:3pt solid #F25B11;margin:0 0 8pt;padding:4pt 0 4pt 12pt;color:#551500;background:#F8F3EC}" +
-      "hr{border:none;border-top:1pt solid #F25B11;margin:12pt 0}" +
-      "table{border-collapse:collapse;width:100%;margin:0 0 8pt}" +
-      "th{background:#FFA349;color:#fff;font-weight:bold;text-align:left;padding:5pt 8pt;border:1pt solid #fff}" +
-      "td{background:#FBE0CF;padding:4pt 8pt;border:1pt solid #fff}" +
-      "tr:nth-child(even) td{background:#FDF0E8}" +
-      "a{color:#F25B11}" +
-      "strong{font-weight:bold}em{font-style:italic}" +
-      "</style></head><body>" + numberHeadings(preview.innerHTML) + "</body></html>";
+      brandCss + "</style></head><body>" + numberHeadings(preview.innerHTML) + "</body></html>";
 
     wordBtn.disabled = true;
     wordBtn.textContent = "Luodaan...";
 
-    patchDocxChrome(window.htmlDocx.asBlob(fullHtml, {
-      margins: {
-        top: 1260,
-        right: 1260,
-        bottom: 1260,
-        left: 1260,
-        header: 720,
-        footer: 720,
-        gutter: 0
-      }
-    }), currentFilename)
+    var margins = { top: 1260, right: 1260, bottom: 1260, left: 1260, header: 720, footer: 720, gutter: 0 };
+    var docxBlob = window.htmlDocx.asBlob(fullHtml, { margins: margins });
+    var promise = useBrand ? patchDocxChrome(docxBlob, currentFilename) : Promise.resolve(docxBlob);
+
+    promise
       .then(function (blob) {
         var url = URL.createObjectURL(blob);
         var link = document.createElement("a");
-
         link.href = url;
         link.download = currentFilename + ".docx";
         document.body.appendChild(link);
         link.click();
         link.remove();
-
-        setTimeout(function () {
-          URL.revokeObjectURL(url);
-        }, 1000);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
       })
       .catch(function (error) {
         console.error(error);
